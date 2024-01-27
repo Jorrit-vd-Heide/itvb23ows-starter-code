@@ -12,6 +12,11 @@ pipeline {
         success {
             echo 'Build succeeded! Deploying to develop...'
             // Deployment steps (e.g., push to a Git branch)
+            // Send email notification
+            emailext subject: 'Build Succeeded',
+                body: 'Build succeeded. See Jenkins console output for details.\\n\\n${BUILD_URL}',
+                to: 'jorrit.vanderheide001@gmail.com',
+                mimeType: 'text/plain'
             script {
                 def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
@@ -27,7 +32,7 @@ pipeline {
                     sh 'git merge --no-ff master'
                     sh 'git push origin Develop'
                 } else {
-                    echo 'Skipping branch-specific deployment for branch:', currentBranch
+                    echo "Skipping branch-specific deployment for branch: ${currentBranch}"
                 }
             }
         }
