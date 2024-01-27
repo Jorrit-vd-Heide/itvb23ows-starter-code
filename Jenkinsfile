@@ -36,6 +36,7 @@ pipeline {
                                 sh 'composer install --no-scripts --no-progress --no-suggest'
                                 sh 'phpunit'
                             }
+                        }
                     }
                     catch (Exception e) {
                         currentBuild.result = 'FAILURE'
