@@ -1,10 +1,10 @@
 <?php
 
-function Get_State() {
+function getState() {
     return serialize([$_SESSION['hand'], $_SESSION['board'], $_SESSION['player']]);
 }
 
-function Set_State($state) {
+function setState($state) {
     list($a, $b, $c) = unserialize($state);
     $_SESSION['hand'] = $a;
     $_SESSION['board'] = $b;
