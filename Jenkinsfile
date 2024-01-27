@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         PHP_IMAGE = 'php:7.2'
+        MYSQL_IMAGE = 'mysql:8.0.3'
     }
 
     stages {
