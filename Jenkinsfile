@@ -6,6 +6,16 @@ pipeline {
         MYSQL_IMAGE = 'mysql:8.0.3'
     }
 
+    options {
+        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: '5'))
+        timestamps()
+        skipDefaultCheckout()
+    }
+
+    triggers {
+        pollSCM('H/5 * * * *') // Every 5 minuts
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -16,10 +26,16 @@ pipeline {
         stage('Build and Test') {
             steps {
                 script {
-                    docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
-                        'docker-php-ext-install mysqli'
-                        'composer install --no-scripts --no-progress --no-suggest'
-                        'phpunit'
+                    try{
+                       docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
+                        sh 'docker-php-ext-install mysqli'
+                        sh 'composer install --no-scripts --no-progress --no-suggest'
+                        sh 'phpunit'
+                        }  
+                    }
+                    catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Build and Test failed: ${e.message}")
                     }
                 }
             }
@@ -45,8 +61,8 @@ pipeline {
             // Add cleanup steps here
             script {
                 docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
-                    'rm -rf vendor'  // Voorbeeld: Verwijder de "vendor" map na de build
-                    'killall -9 php'  // Stop alle PHP-processen
+                    sh 'rm -rf vendor'  
+                    sh 'killall -9 php'  
                 }
             }
         }
