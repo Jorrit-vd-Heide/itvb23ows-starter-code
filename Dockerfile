@@ -1,4 +1,4 @@
-# Use PHP 5.6 image as the base
+# Use PHP 7.2 image as the base
 FROM php:7.2
 
 # Install mysqli extension
