@@ -12,11 +12,6 @@ pipeline {
         success {
             echo 'Build succeeded! Deploying to develop...'
             // Deployment steps (e.g., push to a Git branch)
-            // Send email notification
-            emailext subject: 'Build Succeeded',
-                body: 'Build succeeded. See Jenkins console output for details.\\n\\n${BUILD_URL}',
-                to: 'jorrit.vanderheide001@gmail.com',
-                mimeType: 'text/plain'
             script {
                 def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
@@ -38,9 +33,12 @@ pipeline {
         }
 
         failure {
-            echo 'Build failed! Sending email notification...'
-            // Send email notification with logs
-            emailext body: 'Build failed. See Jenkins console output for details.\\n\\n${BUILD_URL}', subject: 'Build Failed', to: 'jorrit.vanderheide001@gmail.com'
+            echo 'Build failed!'
+            // Display failed logs
+            script {
+                def failedLogs = readFile("${JENKINS_HOME}/workspace/${JOB_NAME}/builds/${BUILD_NUMBER}/log")
+                echo "Failed Logs:\n${failedLogs}"
+            }
         }
     }
 }
