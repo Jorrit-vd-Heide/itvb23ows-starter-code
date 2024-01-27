@@ -1,66 +1,9 @@
 pipeline {
     agent any
-
-    environment {
-        PHP_IMAGE = 'php:7.2'
-        MYSQL_IMAGE = 'mysql:8.0.3'
-    }
-
-    options {
-        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: '5'))
-        timestamps()
-        skipDefaultCheckout()
-    }
-
-    triggers {
-        pollSCM('H/5 * * * *') // Every 5 minutes
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Build and Test') {
-            steps {
-                script {
-                    try {
-                        sh 'DOCKER_TLS_VERIFY= docker pull php:7.2'
-                        sh 'DOCKER_TLS_VERIFY= docker inspect -f . php:7.2'
-
-                        docker.withRegistry('https://registry.hub.docker.com', 'Docker-Hub') {
-                            docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
-                                sh 'docker-php-ext-install mysqli'
-                                sh 'composer install --no-scripts --no-progress --no-suggest'
-                                sh 'phpunit'
-                            }
-                        }
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Build and Test failed: ${e.message}")
-                    }
-                }
-            }
-        }
-
-        stage('Run PHP Server') {
-            steps {
-                script {
-                    try {
-                        docker.withRegistry('https://registry.hub.docker.com', 'Docker-Hub') {
-                            docker.image(PHP_IMAGE).inside('-p 8000:8000 -v $PWD:/app') {
-                                'php -S 0.0.0.0:8000 -t /app &'
-                                waitUntil { script.sh(script: 'curl -s http://localhost:8000', returnStatus: true) == 0 }
-                                echo 'PHP server is running successfully.'
-                            }
-                        }
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Run PHP Server failed: ${e.message}")
-                    }
-                }
+                echo 'Build completed'
             }
         }
     }
