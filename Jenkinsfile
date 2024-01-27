@@ -27,11 +27,15 @@ pipeline {
             steps {
                 script {
                     try{
-                       docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
-                        sh 'docker-php-ext-install mysqli'
-                        sh 'composer install --no-scripts --no-progress --no-suggest'
-                        sh 'phpunit'
-                        }  
+                         sh 'DOCKER_TLS_VERIFY= docker pull php:7.2'
+                         sh 'DOCKER_TLS_VERIFY= docker inspect -f . php:7.2'
+
+                         docker.withRegistry('https://registry.hub.docker.com', 'Docker-Hub') {
+                            docker.image(PHP_IMAGE).inside('-v $PWD:/app') {
+                                sh 'docker-php-ext-install mysqli'
+                                sh 'composer install --no-scripts --no-progress --no-suggest'
+                                sh 'phpunit'
+                            }
                     }
                     catch (Exception e) {
                         currentBuild.result = 'FAILURE'
@@ -44,10 +48,17 @@ pipeline {
         stage('Run PHP Server') {
             steps {
                 script {
-                    docker.image(PHP_IMAGE).inside('-p 8000:8000 -v $PWD:/app') {
-                        'php -S 0.0.0.0:8000 -t /app &'
-                        waitUntil { script.sh(script: 'curl -s http://localhost:8000', returnStatus: true) == 0 }
-                        echo 'PHP server is running successfully.'
+                    try{
+                       docker.withRegistry('https://registry.hub.docker.com', 'Docker-Hub') {
+                            docker.image(PHP_IMAGE).inside('-p 8000:8000 -v $PWD:/app') {
+                                'php -S 0.0.0.0:8000 -t /app &'
+                                waitUntil { script.sh(script: 'curl -s http://localhost:8000', returnStatus: true) == 0 }
+                                echo 'PHP server is running successfully.'
+                            }
+                    }
+                    catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Build and Test failed: ${e.message}")
                     }
                 }
             }
