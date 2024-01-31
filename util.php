@@ -46,8 +46,8 @@ function slide($board, $from, $to) {
     if (!hasNeighBour($to, $board)) {
         return false;
     } elseif (!isNeighbour($from, $to)) {
-            return false;  
-    } else { 
+            return false;
+    } else {
     $b = explode(',', $to);
     $common = [];
 
@@ -58,7 +58,7 @@ function slide($board, $from, $to) {
             $common[] = $p.",".$q;
         }
     }
-    if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) { 
+    if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) {
         return false;
     }
     return min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));

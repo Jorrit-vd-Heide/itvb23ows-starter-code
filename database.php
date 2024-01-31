@@ -1,6 +1,6 @@
 <?php
 
-include 'config.php';
+include_once 'config.php';
 
 function getState() {
     return serialize([$_SESSION['hand'], $_SESSION['board'], $_SESSION['player']]);
