@@ -1,32 +1,33 @@
 <?php
-    session_start();
+session_start();
 
 include_once 'util.php';
 
-    if (!isset($_SESSION['board'])) {
-        header('Location: restart.php');
-        exit(0);
-    }
+if (!isset($_SESSION['board'])) {
+    header('Location: restart.php');
+    exit(0);
+}
 
-    $board = $_SESSION['board'];
-    $player = $_SESSION['player'];
-    $hand = $_SESSION['hand'];
+$board = $_SESSION['board'];
+$player = $_SESSION['player'];
+$hand = $_SESSION['hand'];
 
-    $to = [];
-    foreach ($GLOBALS['OFFSETS'] as $pq) {
-        foreach (array_keys($board) as $pos) {
-            $pq2 = explode(',', $pos);
-            $to[] = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
-        }
+$to = [];
+foreach ($GLOBALS['OFFSETS'] as $pq) {
+    foreach (array_keys($board) as $pos) {
+        $pq2 = explode(',', $pos);
+        $to[] = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
     }
+}
 
-    $to = array_unique($to);
-    if (!count($to)) {
-     $to[] = '0,0';
-    }
+$to = array_unique($to);
+if (!count($to)) {
+    $to[] = '0,0';
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
     <head>
         <title>Hive</title>
         <style>
@@ -114,11 +115,11 @@ include_once 'util.php';
         <div class="hand">
             White:
             <?php
-                foreach ($hand[0] as $tile => $ct) {
-                    for ($i = 0; $i < $ct; $i++) {
-                        echo '<div class="tile player0"><span>'.$tile."</span></div> ";
-                    }
+            foreach ($hand[0] as $tile => $ct) {
+                for ($i = 0; $i < $ct; $i++) {
+                    echo '<div class="tile player0"><span>'.$tile."</span></div> ";
                 }
+            }
             ?>
         </div>
         <div class="hand">
@@ -132,26 +133,28 @@ include_once 'util.php';
             ?>
         </div>
         <div class="turn">
-            Turn: <?php if ($player == 0) {
-                echo "White";
-                } else {
-                    echo "Black";
-                    }
-                ?>
+            Turn: 
+            <?php 
+            if ($player == 0) {
+            echo "White";
+            } else {
+                echo "Black";
+                }
+            ?>
         </div>
         <form method="post" action="play.php">
             <select name="piece">
                 <?php
-                    foreach ($hand[$player] as $tile => $ct) {
-                        echo "<option value=\"$tile\">$tile</option>";
-                    }
+                foreach ($hand[$player] as $tile => $ct) {
+                    echo "<option value=\"$tile\">$tile</option>";
+                }
                 ?>
             </select>
             <select name="to">
                 <?php
-                    foreach ($to as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
-                    }
+                foreach ($to as $pos) {
+                    echo "<option value=\"$pos\">$pos</option>";
+                }
                 ?>
             </select>
             <input type="submit" value="Play">
@@ -159,16 +162,16 @@ include_once 'util.php';
         <form method="post" action="move.php">
             <select name="from">
                 <?php
-                    foreach (array_keys($board) as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
-                    }
+                foreach (array_keys($board) as $pos) {
+                    echo "<option value=\"$pos\">$pos</option>";
+                }
                 ?>
             </select>
             <select name="to">
                 <?php
-                    foreach ($to as $pos) {
-                        echo "<option value=\"$pos\">$pos</option>";
-                    }
+                foreach ($to as $pos) {
+                    echo "<option value=\"$pos\">$pos</option>";
+                }
                 ?>
             </select>
             <input type="submit" value="Move">
@@ -179,21 +182,23 @@ include_once 'util.php';
         <form method="post" action="restart.php">
             <input type="submit" value="Restart">
         </form>
-        <strong><?php
-        if (isset($_SESSION['error'])) {
-            echo $_SESSION['error'];
-            unset($_SESSION['error']);
+        <strong>
+            <?php
+            if (isset($_SESSION['error'])) {
+                echo $_SESSION['error'];
+                unset($_SESSION['error']);
             }
-        ?></strong>
+            ?>
+        </strong>
         <ol>
             <?php
-                $db = include_once 'database.php';
-                $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = '.$_SESSION['game_id']);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                while ($row = $result->fetch_array()) {
-                    echo '<li>'.$row[2].' '.$row[3].' '.$row[4].'</li>';
-                }
+            $db = include_once 'database.php';
+            $stmt = $db->prepare('SELECT * FROM moves WHERE game_id = '.$_SESSION['game_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_array()) {
+                echo '<li>'.$row[2].' '.$row[3].' '.$row[4].'</li>';
+            }
             ?>
         </ol>
         <form method="post" action="undo.php">
@@ -201,4 +206,3 @@ include_once 'util.php';
         </form>
     </body>
 </html>
-

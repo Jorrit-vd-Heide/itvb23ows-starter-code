@@ -6,14 +6,19 @@ function isNeighbour($a, $b) {
     $a = explode(',', $a);
     $b = explode(',', $b);
 
+    $result = false;
+
     if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) {
-        return true;
+         // Condition 1: Check if the first elements are equal and the absolute difference of the second elements is 1
+        $result = true;
     } elseif ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
-        return true;
-    } elseif (($a[0] + $a[1] == $b[0] + $b[1])) {
-        return true;
+        // Condition 2: Check if the second elements are equal and the absolute difference of the first elements is 1
+        $result = true;
+    } elseif ($a[0] + $a[1] == $b[0] + $b[1]) {
+        // Condition 3: Check if the sum of both elements is equal
+        $result = true;
     }
-    return false;
+    return $result;
 }
 
 
@@ -43,24 +48,26 @@ function len($tile) {
 }
 
 function slide($board, $from, $to) {
-    if (!hasNeighBour($to, $board)) {
-        return false;
-    } elseif (!isNeighbour($from, $to)) {
-            return false;
-    } else {
-    $b = explode(',', $to);
-    $common = [];
+    $result = false;
 
-    foreach ($GLOBALS['OFFSETS'] as $pq) {
-        $p = $b[0] + $pq[0];
-        $q = $b[1] + $pq[1];
-        if (isNeighbour($from, $p.",".$q)) {
-            $common[] = $p.",".$q;
+    if (!hasNeighBour($to, $board) || !!isNeighbour($from, $to)) {
+        $result = false;
+    } else {
+        $b = explode(',', $to);
+        $common = [];
+
+        foreach ($GLOBALS['OFFSETS'] as $pq) {
+            $p = $b[0] + $pq[0];
+            $q = $b[1] + $pq[1];
+            if (isNeighbour($from, $p.",".$q)) {
+                $common[] = $p.",".$q;
+            }
+        }
+        if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) {
+            $result = false;
+        } else {
+            $result = min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));
         }
     }
-    if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) {
-        return false;
-    }
-    return min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));
-    }
+    return $result;
 }
