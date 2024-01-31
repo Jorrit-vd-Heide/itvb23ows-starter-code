@@ -8,14 +8,9 @@ function isNeighbour($a, $b) {
 
     $result = false;
 
-    if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) {
-         // Condition 1: Check if the first elements are equal and the absolute difference of the second elements is 1
-        $result = true;
-    } elseif ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
-        // Condition 2: Check if the second elements are equal and the absolute difference of the first elements is 1
+    if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) || ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
         $result = true;
     } elseif ($a[0] + $a[1] == $b[0] + $b[1]) {
-        // Condition 3: Check if the sum of both elements is equal
         $result = true;
     }
     return $result;
@@ -66,7 +61,8 @@ function slide($board, $from, $to) {
         if (!$board[$common[0]] && !$board[$common[1]] && !$board[$from] && !$board[$to]) {
             $result = false;
         } else {
-            $result = min(len($board[$common[0]]), len($board[$common[1]])) <= max(len($board[$from]), len($board[$to]));
+            $result = min(len($board[$common[0]]), len($board[$common[1]])) 
+                <= max(len($board[$from]), len($board[$to]));
         }
     }
     return $result;
