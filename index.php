@@ -1,7 +1,7 @@
 <?php
     session_start();
 
-    include_once 'util.php';
+include_once 'util.php';
 
     if (!isset($_SESSION['board'])) {
         header('Location: restart.php');
@@ -26,7 +26,7 @@
     }
 ?>
 <!DOCTYPE html>
-<html lang="en">    
+<html lang="en"> 
     <head>
         <title>Hive</title>
         <style>
@@ -84,7 +84,7 @@
                 $min_q = 1000;
                 foreach ($board as $pos => $tile) {
                     $pq = explode(',', $pos);
-                    if ($pq[0] < $min_p) { 
+                    if ($pq[0] < $min_p) {
                         $min_p = $pq[0];
                     }
                     if ($pq[1] < $min_q) {
@@ -98,7 +98,7 @@
                     $h = count($tile);
                     echo '<div class="tile player';
                     echo $tile[$h-1][0];
-                    if ($h > 1) { 
+                    if ($h > 1) {
                         echo ' stacked';
                     }
                     echo '" style="left: ';
@@ -132,11 +132,11 @@
             ?>
         </div>
         <div class="turn">
-            Turn: <?php if ($player == 0) { 
+            Turn: <?php if ($player == 0) {
                 echo "White";
                 } else {
                     echo "Black";
-                    } 
+                    }
                 ?>
         </div>
         <form method="post" action="play.php">
@@ -179,11 +179,11 @@
         <form method="post" action="restart.php">
             <input type="submit" value="Restart">
         </form>
-        <strong><?php 
+        <strong><?php
         if (isset($_SESSION['error'])) {
             echo $_SESSION['error'];
             unset($_SESSION['error']);
-            }      
+            }
         ?></strong>
         <ol>
             <?php
