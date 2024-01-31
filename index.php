@@ -133,13 +133,13 @@ if (!count($to)) {
             ?>
         </div>
         <div class="turn">
-            Turn: 
-            <?php 
+            Turn:
+            <?php
             if ($player == 0) {
-            echo "White";
+                echo "White";
             } else {
                 echo "Black";
-                }
+            }
             ?>
         </div>
         <form method="post" action="play.php">
