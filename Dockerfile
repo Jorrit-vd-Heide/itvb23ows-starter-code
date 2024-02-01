@@ -1,17 +1,24 @@
-# Use PHP 7.2 image as the base
-FROM php:7.2
+# Use PHP 8.2 image as the base
+FROM php:8.2-apache
 
 # Install mysqli extension
 RUN docker-php-ext-install mysqli
 
+# Install and enable pcov extension
+RUN pecl install pcov \
+    && docker-php-ext-enable pcov
+
 # Set the working directory
-WORKDIR /src
+WORKDIR /var/www/html
 
 # Copy PHP files to the container's working directory
-COPY . /src
+COPY ./src /var/www/html
 
-# Expose port 8000 (the port the PHP server will use)
-EXPOSE 8000
+# Expose port 80 (the port the PHP server will use)
+EXPOSE 80
 
-# Set up PHP server to run the application
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "/src"]
+# Apache gets grumpy about PID files pre-existing
+RUN rm -f /usr/local/apache2/logs/httpd.pid
+
+# Start Apache in the foreground
+CMD ["apache2-foreground"]
