@@ -5,7 +5,6 @@ services:
     ports:
       - "8000:8000"
 
-
   mysql:
     image: mysql:8.0.3
     environment:
@@ -22,4 +21,14 @@ services:
     privileged: true
     user: root
     ports:
-      -8080:8080
+      - "8080:8080"
+
+  sonarqube:
+    image: sonarqube:latest
+    ports:
+      - "9000:9000"
+      - "9092:9092"
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:mysql://mysql:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance
+      - SONARQUBE_JDBC_USERNAME=admin
+      - SONARQUBE_JDBC_PASSWORD=Wijte1997.     

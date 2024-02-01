@@ -8,7 +8,7 @@ function isNeighbour($a, $b) {
 
     $result = false;
 
-    if ($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) || ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1) {
+    if (($a[0] == $b[0] && abs($a[1] - $b[1]) == 1) || ($a[1] == $b[1] && abs($a[0] - $b[0]) == 1)) {
         $result = true;
     } elseif ($a[0] + $a[1] == $b[0] + $b[1]) {
         $result = true;
