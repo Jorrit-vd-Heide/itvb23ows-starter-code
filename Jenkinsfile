@@ -8,9 +8,9 @@ pipeline {
         }
         stage('SonarQube') {
             steps {
-                script { scannerHome = tool 'SonarQube-Scanner' }
+                script { scannerHome = tool 'SonarQube Scanner' }
                 withSonarQubeEnv('SonarQube') {
-                 sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=OWS-Hive"
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=OWS-Hive"
                 }
             }
         }
@@ -43,10 +43,6 @@ pipeline {
         failure {
             echo 'Build failed!'
             // Display failed logs
-            script {
-                def failedLogs = readFile("${JENKINS_HOME}/workspace/${JOB_NAME}/builds/${BUILD_NUMBER}/log")
-                echo "Failed Logs:\n${failedLogs}"
-            }
         }
     }
 }

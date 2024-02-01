@@ -2,5 +2,5 @@ projectKey=OWS-Hive
 serverUrl=http://sonarqube:9000
 serverVersion=10.3.0.82913
 dashboardUrl=http://sonarqube:9000/dashboard?id=OWS-Hive
-ceTaskId=AY1kOdFxYD2vPc1JQd8h
-ceTaskUrl=http://sonarqube:9000/api/ce/task?id=AY1kOdFxYD2vPc1JQd8h
+ceTaskId=AY1koa-mLd-Urx-IEGPy
+ceTaskUrl=http://sonarqube:9000/api/ce/task?id=AY1koa-mLd-Urx-IEGPy
