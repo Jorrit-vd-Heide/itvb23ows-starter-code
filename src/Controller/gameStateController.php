@@ -1,7 +1,5 @@
 <?php
 
-require_once 'game.php';
-
 trait GameState {
     // Load game state from session
     public function loadSession() {
@@ -15,20 +13,20 @@ trait GameState {
         $this->game_id = $_SESSION['game_id'];
         $this->board = $_SESSION['board'];
         $this->hand = $_SESSION['hand'];
-        $this->current_player = $_SESSION['player'];
+        $this->activePlayer = $_SESSION['player'];
         $this->last_move = $_SESSION['last_move'];
     }
 
     // Set game state as a serialized string
     public function setState() {
         // Return a serialized string of the game state
-        return serialize([$this->board, $this->hand, $this->current_player]);
+        return serialize([$this->board, $this->hand, $this->activePlayer]);
     }
 
     // Get game state from a serialized string
     public function getState($state) {
         // Unserialize the string and assign the values to the corresponding properties
-        list($this->board, $this->hand, $this->current_player) = unserialize($state);
+        list($this->board, $this->hand, $this->activePlayer) = unserialize($state);
     }
 
     // Save game state to session
@@ -38,7 +36,7 @@ trait GameState {
         $_SESSION['board'] = $this->board; 
         $_SESSION['hand'] = $this->hand; 
         $_SESSION['error'] = $this->error;
-        $_SESSION['player'] = $this->current_player;
+        $_SESSION['player'] = $this->activePlayer;
         $_SESSION['last_move'] = $this->last_move;
     }
 }
