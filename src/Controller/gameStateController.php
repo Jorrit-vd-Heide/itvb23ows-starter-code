@@ -1,28 +1,39 @@
 <?php
 
-require_once 'gameController.php';
+require_once 'game.php';
 
 trait GameState {
-    public function loadSession(){
-        if(!isset($_SESSION['board'])){
-            throw new excepton('Not able to get state');
+    // Load game state from session
+    public function loadSession() {
+        // Check if board is set in the session
+        if(!isset($_SESSION['board'])) {
+            // If not, throw an exception
+            throw new exception('Not able to get state');
         }
-        $this-> game_id = $_SESSION['game_id'];
-        $this-> board = $_SESSION['board'];
-        $this-> hand = $_SESSION['hand'];
-        $this-> current_player = $_SESSION['player'];
-        $this-> last_move = $_SESSION['last_move'];
+
+        // Load game state from session variables
+        $this->game_id = $_SESSION['game_id'];
+        $this->board = $_SESSION['board'];
+        $this->hand = $_SESSION['hand'];
+        $this->current_player = $_SESSION['player'];
+        $this->last_move = $_SESSION['last_move'];
     }
 
-    public function setState(){
-        return serialize([$this-> board, $this-> hand, $this-> current_player]);
+    // Set game state as a serialized string
+    public function setState() {
+        // Return a serialized string of the game state
+        return serialize([$this->board, $this->hand, $this->current_player]);
     }
 
-    public function getState($state){
-        list($this-> board, $this-> hand, $this-> current_player) = unserialize($state);
+    // Get game state from a serialized string
+    public function getState($state) {
+        // Unserialize the string and assign the values to the corresponding properties
+        list($this->board, $this->hand, $this->current_player) = unserialize($state);
     }
 
-    public function saveStateToSession(){
+    // Save game state to session
+    public function saveStateToSession() {
+        // Save the game state to session variables
         $_SESSION['game_id'] = $this->game_id; 
         $_SESSION['board'] = $this->board; 
         $_SESSION['hand'] = $this->hand; 

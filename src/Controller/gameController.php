@@ -1,19 +1,30 @@
 <?php
 
-require_once 'gameStateController.php';
+// Game class representing a single game session
 
-class Game{
-    use GameState;
+require_once 'gameController.php';require_once 'Controller.php';require_once 'Controller.php';
+class Game {
+   // GameState, Board, and PlayTile traits are used for game state management, board representation, and play tile functionality
 
-    private $game_id = 0;
-    public $board = array();
-    private $hand = array();
-    private $error = null;
-    public $current_player = 0;
-    private $database;
-    private $last_move = 0;
+   use GameState, Board, PlayTile;
 
-    public function __construct($database) {
-        $this->database = $database;
-    }
+   // game_id: unique identifier for each game
+   private $game_id = 0;
+   // board: 2D array representing the game board
+   public $board = array();
+   // hand: array to store tiles in a player's hand
+   private $hand = array();
+   // error: variable to store any error messages during gameplay
+   private $error = null;
+   // current_player: integer representing the current player's turn
+   public $current_player = 0;
+   // database: instance of the database class for database operations
+   private $database;
+   // last_move: integer representing the last move made in the game
+   private $last_move = 0;
+
+   // constructor initializing the game with a database object
+   public function __construct($database) {
+       $this->database = $database;
+   }
 }
