@@ -1,19 +1,26 @@
 <?php
-    session_start();
 
-    include_once 'util.php';
-    include_once 'hiveGame.php';
-    include_once 'database.php';
+namespace src\Views;
 
-    $db = retrieveDatabase();
-    
-    $game = new Game($db);
-    try {
-        $game->currentSession();
-    } catch (Exception $e) {
-        header('Location: restart.php');
-        exit(0);
-    }
+session_start();
+
+include 'controllers/gameStateController.php';  // Use consistent case
+use function src\Controllers\loadSession;  // Use consistent case
+include 'models/game.php';  // Use consistent case
+use src\Models\Game;
+require_once 'models/database.php';  // Use consistent case
+use function src\Models\retrieveDatabase;
+
+$db = retrieveDatabase();
+
+$game = new Game($db);
+try {
+    $game-> loadSession();
+    var_dump($_SESSION);
+} catch (Exception $e) {
+    header('Location: restart.php');
+    exit(0);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -126,15 +133,9 @@
         <form method="post" action="restart.php">
             <input type="submit" value="Restart">
         </form>
-        <strong><?php 
-            if ($game->hasError()) {
-                echo $game->getError();
-                $game->clearError();
-            }
-        ?></strong>
         <ol>
             <?php
-                echo $game->getPreviousMoves();
+                echo $game->getMoveHistory();
             ?>
         </ol>
         <form method="post" action="undo.php">

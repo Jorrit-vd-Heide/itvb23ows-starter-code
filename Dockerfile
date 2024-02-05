@@ -12,7 +12,12 @@ RUN pecl install pcov \
 WORKDIR /var/www/html
 
 # Copy PHP files to the container's working directory
-COPY ./src /var/www/html
+# Copy models, views, and controllers
+COPY ./src/Models /var/www/html/models
+COPY ./src/Views /var/www/html/views
+COPY ./src/Controllers /var/www/html/controllers
+COPY ./src/Views/index.php /var/www/html/index.php
+COPY ./src/restart.php /var/www/html/restart.php
 
 # Expose port 80 (the port the PHP server will use)
 EXPOSE 80

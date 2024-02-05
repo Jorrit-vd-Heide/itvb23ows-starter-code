@@ -1,5 +1,7 @@
 <?php
 
+namespace src\Views;
+
 $GLOBALS['OFFSETS'] = [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1]];
 
 function isNeighbour($a, $b) {

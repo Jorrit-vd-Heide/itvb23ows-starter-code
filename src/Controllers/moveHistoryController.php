@@ -1,9 +1,11 @@
 <?php
 
+namespace src\Controllers;
+
 trait MoveHistory{
     // This method returns an HTML string representing the move history of a game
     public function getMoveHistory() {
-        // Prepare a SQL statement to select all moves from the 'moves' table where the 'game\_id' matches the game ID of the current object
+        // Prepare a SQL statement to select all moves from the 'moves' table where the 'game_id' matches the game ID of the current object
         $stmt = $this->database->prepare('SELECT * FROM moves WHERE game_id = ?');
 
         // Bind the game ID of the current object to the SQL statement as a parameter

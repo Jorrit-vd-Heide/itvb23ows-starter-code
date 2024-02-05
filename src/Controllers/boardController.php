@@ -1,5 +1,7 @@
 <?php
 
+namespace src\Controllers;
+
 trait Board {
     // Returns an HTML string representing the game board
     public function getBoardHtml() {
