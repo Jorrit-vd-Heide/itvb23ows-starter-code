@@ -1,24 +1,21 @@
 <?php
 
-namespace src\Views;
-
 session_start();
 
-include 'controllers/gameStateController.php';  // Use consistent case
-use function src\Controllers\loadSession;  // Use consistent case
-include 'models/game.php';  // Use consistent case
-use src\Models\Game;
-require_once 'models/database.php';  // Use consistent case
-use function src\Models\retrieveDatabase;
+include_once '/var/www/html/Models/hiveGameModel.php';
+include_once '/var/www/html/Controllers/hiveGameController.php';
+include_once '/var/www/html/Views/hiveGameView.php';
+include_once '/var/www/html/Models/database.php';
 
 $db = retrieveDatabase();
+$game = new HiveGameModel($db);
+$view = new HiveGameView($game);
+$controller = new HiveGameController($game, $view);
 
-$game = new Game($db);
 try {
-    $game-> loadSession();
-    var_dump($_SESSION);
+   $game->loadSession();
 } catch (Exception $e) {
-    header('Location: restart.php');
+    header('Location: ../restart.php');
     exit(0);
 }
 ?>
@@ -77,33 +74,33 @@ try {
     <body>
         <div class="board">
             <?php
-                echo $game->constructBoard();
+                echo $view->getBoardHtml();
             ?>
         </div>
 
         <?php
             for ($player = 0; $player < 2; $player++) {
                 echo "<div class=\"hand\">";
-                echo $game->changeActivePlayer($player).": ";
-                echo $game->getHand($player);
+                echo $controller->getPlayerName($player).": ";
+                echo $view->getHandHtml($player);
                 echo "</div>";
             }
         ?>
 
         <div class="turn">
-            Turn: <?php echo $game->changeActivePlayer($game->getActivePlayer()); ?>
+            Turn: <?php echo $controller->getPlayerName($controller->getActivePlayer()); ?>
         </div>
         <form method="post" action="play.php">
             <select name="piece">
                 <?php
-                    foreach ($game->getHand($game->getActivePlayer()) as $tile => $ct) {
+                    foreach ($controller->getHand($controller->getActivePlayer()) as $tile => $ct) {
                         echo "<option value=\"$tile\">$tile</option>";
                     }
                 ?>
             </select>
             <select name="to">
                 <?php
-                    foreach ($game->getAvailablePositions() as $pos) {
+                    foreach ($to as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
@@ -113,14 +110,15 @@ try {
         <form method="post" action="move.php">
             <select name="from">
                 <?php
-                    foreach ($game->isMoveAvailable() as $pos) {
+                    $board = $game->board;
+                    foreach (array_keys($board) as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
             </select>
             <select name="to">
                 <?php
-                    foreach ($game->availableMoves() as $pos) {
+                     foreach ($to as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
@@ -135,7 +133,6 @@ try {
         </form>
         <ol>
             <?php
-                echo $game->getMoveHistory();
             ?>
         </ol>
         <form method="post" action="undo.php">

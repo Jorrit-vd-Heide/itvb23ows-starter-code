@@ -1,7 +1,5 @@
 <?php
 
-namespace src\Models;
-
 $config = array(
     'db_host' => 'mysql',
     'db_user' => 'root',
