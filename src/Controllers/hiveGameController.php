@@ -63,22 +63,10 @@ class HiveGameController {
     // Get possible moves for the game
     public function getPossibleMoves() {
         $to = [];
-        $hand = $this->getHand($this->getActivePlayer());
         foreach ($GLOBALS['OFFSETS'] as $pq) {
             foreach (array_keys($this->model->board) as $pos) {
-                list($x, $y) = explode(',', $pos);
-                $newPos = ($pq[0] + $x).','.($pq[1] + $y);
-
-                if (isset($this->model->board[$newPos])) {
-                    continue;
-                }
-                if (count($this->model->board) && !hasNeighBour($newPos, $this->model->board)) {
-                    continue;
-                }
-                if (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $newPos, $this->model->board)) {
-                    continue;
-                }
-                $to[] = $newPos;
+                $pq2 = explode(',', $pos);
+                $to[] = ($pq[0] + $pq2[0]).','.($pq[1] + $pq2[1]);
             }
         }
         $to = array_unique($to);
@@ -102,6 +90,9 @@ class HiveGameController {
                     continue;
                 }
                 if (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $newPos, $this->model->board)) {
+                    continue;
+                }
+                if (array_sum($hand) <= 8 && $hand['Q']) {
                     continue;
                 }
                 $to[] = $newPos;
@@ -142,7 +133,7 @@ class HiveGameController {
 
     // Get tiles that can be moved
     public function getTilesToMove() {
-        if ($this->hand[$this->getActivePlayer()]['Q']) {
+        if ($this->model->hand[$this->getActivePlayer()]['Q']) {
             return [];
         }
 
@@ -164,10 +155,6 @@ class HiveGameController {
 
         if (!isset($this->model->board[$piece])) {
             $this->setError('Board position is empty');
-        } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
-            $this->setError("board position has no neighbour");
-        } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
-            $this->setError("Board position has opposing neighbour");    
         } elseif ($this->model->board[$piece][count($this->model->board[$piece]) - 1][0] != $this->getActivePlayer()) {
             $this->setError("Tile is not owned by player");
         } elseif (isset($hand['Q'])) {
@@ -219,12 +206,14 @@ class HiveGameController {
             } else {
                 $this->model->board[$to] = [$tile];
             }
+            // Remove the original position from the board
+            unset($this->model->board[$piece]);
             $this->changePlayer();
-            $stmt = $this->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
+            $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
             $setState = $this->model->setState();
             $stmt->bind_param('issis', $this->model->game_id, $piece, $to, $this->model->last_move, $setState);
             $stmt->execute();
-            $this->last_move = $this->database->insert_id;
+            $this->model->last_move = $this->model->database->insert_id;
         }
     }
 
