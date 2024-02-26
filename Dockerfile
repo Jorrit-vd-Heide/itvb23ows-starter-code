@@ -5,12 +5,6 @@ FROM php:8.2-apache
 RUN docker-php-ext-install mysqli
 RUN docker-php-ext-enable mysqli
 
-# Install and enable pcov extension
-RUN pecl install pcov \
-    && docker-php-ext-enable pcov
-
-
-# Copy PHP files to the container's working directory
 # Copy models, views, and controllers
 COPY ./src /var/www/html/
 

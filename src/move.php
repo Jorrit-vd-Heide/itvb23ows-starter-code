@@ -10,12 +10,12 @@ $piece = $_POST['from'];
 $to = $_POST['to'];
 
 $db = retrieveDatabase();
-$model = new HiveGameModel($db);
-$view = new HiveGameView($model);
-$controller = new HiveGameController($model, $view);
+$game = new HiveGameModel($db);
+$view = new HiveGameView($game);
+$controller = new HiveGameController($game, $view);
 
 try {
-    $model->loadSession();
+    $game->loadSession();
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
     header('Location: index.php');
@@ -23,6 +23,6 @@ try {
 }
 
 $controller->moveTile($piece, $to);
-$model->saveState();
+$game->saveState();
 
 header('Location: index.php');

@@ -4,13 +4,14 @@ services:
     build: .
     ports:
       - "8000:80"
+    volumes:
+      - ./Tests:/var/www/html/Tests
 
   mysql:
     image: mysql:8.0.3
     environment:
-      MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: hive
-      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
     ports:
       - "3306:3306"
     volumes:
