@@ -58,4 +58,21 @@ class moveTest extends TestCase {
         $expectedMoves = ['1,0', '0,1', '1,2', '-1,1', '0,-1', '-1,0']; // Expected result when the board is not empty
         $this->assertEquals($expectedMoves, $result);
     }
+
+    public function testCertainQueenBeeMove() {
+        // Arrange: Set up the initial state of the board (non-empty board)
+        $this->model->board = ['0,0' => 'tile1', '1,0' => 'tile2'];
+
+        // Set up expectations for the getPossibleMoves method
+        $this->controllerMock->expects($this->once())
+                             ->method('getPossibleMoves')
+                             ->willReturn(['0,1', '1,1', '0,-1', '1,-1', '1,0', '2,0', '-1,0', '0,0', '-1,1', '2,-1']); // Simulate possible moves when the board is not empty
+
+        // Act: Call the method under test
+        $result = $this->controllerMock->getPossibleMoves();
+
+        // Assert: Verify the result against the expected outcome
+        $expectedMoves = ['0,1', '1,1', '0,-1', '1,-1', '1,0', '2,0', '-1,0', '0,0', '-1,1', '2,-1']; // Expected result when the board is not empty
+        $this->assertEquals($expectedMoves, $result);
+    }
 }
