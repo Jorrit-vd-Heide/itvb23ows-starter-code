@@ -74,7 +74,7 @@ class HiveGameController {
         return $to;
     }
 
-    // Get possible plays for the active play
+    // Get possible plays for the active player
     public function getPossiblePlays() {
         $to = [];
         $hand = $this->getHand($this->getActivePlayer());
@@ -90,9 +90,6 @@ class HiveGameController {
                     continue;
                 }
                 if (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $newPos, $this->model->board)) {
-                    continue;
-                }
-                if (array_sum($hand) <= 8 && $hand['Q']) {
                     continue;
                 }
                 $to[] = $newPos;
@@ -113,10 +110,10 @@ class HiveGameController {
         } elseif (isset($this->model->board[$to])) {
             $this->setError('Board position is not empty');
         } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
-            $this->setError("board position has no neighbour");
+            $this->setError("Board position has no neighbour");
         } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
             $this->setError("Board position has opposing neighbour");
-        } elseif (array_sum($hand) <= 8 && isset($hand['Q']) && $hand['Q'] > 0 && $piece != 'Q')  {
+        } elseif (array_sum($hand) <= 8 && $hand['Q'] && $piece != 'Q')  {
             $this->setError("Must play queen bee");
         }
         if ($this->hasError()) return;
