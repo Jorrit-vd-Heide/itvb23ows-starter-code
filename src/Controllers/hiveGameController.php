@@ -155,6 +155,10 @@ class HiveGameController {
 
         if (!isset($this->model->board[$piece])) {
             $this->setError('Board position is empty');
+        } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
+            $this->setError("Board position has no neighbour");
+        } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
+            $this->setError("Board position has opposing neighbour");    
         } elseif ($this->model->board[$piece][count($this->model->board[$piece]) - 1][0] != $this->getActivePlayer()) {
             $this->setError("Tile is not owned by player");
         } elseif (isset($hand['Q'])) {
