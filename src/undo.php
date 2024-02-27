@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 include_once '/var/www/html/Models/hiveGameModel.php';
@@ -10,7 +11,6 @@ $db = retrieveDatabase();
 $game = new HiveGameModel($db);
 $view = new HiveGameView($game);
 $controller = new HiveGameController($game, $view);
-
 try {
     $game->loadSession();
 } catch (Exception $e) {
@@ -19,12 +19,7 @@ try {
     exit;
 }
 
-$piece = $_POST['piece'];
-$to = $_POST['to'];
-
-$hand = $controller->getHand($controller->getActivePlayer());
-
-$controller->playTile($piece, $to);
-$game->saveState();
+$controller->undo();
+$game->saveStateToSession();
 
 header('Location: index.php');

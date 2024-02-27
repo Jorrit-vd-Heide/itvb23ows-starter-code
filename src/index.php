@@ -15,7 +15,7 @@ $controller = new HiveGameController($game, $view);
 try {
    $game->loadSession();
 } catch (Exception $e) {
-    header('Location: ../restart.php');
+    header('Location: restart.php');
     exit(0);
 }
 ?>
@@ -100,7 +100,7 @@ try {
             </select>
             <select name="to">
                 <?php
-                    foreach ($to as $pos) {
+                    foreach ($controller->getPossiblePlays() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
@@ -110,15 +110,14 @@ try {
         <form method="post" action="move.php">
             <select name="from">
                 <?php
-                    $board = $game->board;
-                    foreach (array_keys($board) as $pos) {
+                    foreach ($controller->getTilesToMove() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
             </select>
             <select name="to">
                 <?php
-                     foreach ($to as $pos) {
+                    foreach ($controller->getPossibleMoves() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
                 ?>
