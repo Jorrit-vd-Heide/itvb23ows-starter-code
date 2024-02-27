@@ -113,7 +113,7 @@ class HiveGameController {
             $this->setError("Board position has no neighbour");
         } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
             $this->setError("Board position has opposing neighbour");
-        } elseif (array_sum($hand) <= 8 && $hand['Q'] && $piece != 'Q')  {
+        } elseif (array_sum($hand) <= 8 && isset($hand['Q']) && $hand['Q'] > 0 && $piece != 'Q')  {
             $this->setError("Must play queen bee");
         }
         if ($this->hasError()) return;
@@ -208,7 +208,9 @@ class HiveGameController {
                 $this->model->board[$to] = [$tile];
             }
             // Remove the original position from the board
-            unset($this->model->board[$piece]);
+            if (count($this->model->board[$piece]) == 0){
+                unset($this->model->board[$piece]);
+            }
             $this->changePlayer();
             $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
             $setState = $this->model->setState();
@@ -220,7 +222,7 @@ class HiveGameController {
 
     // Pass the turn to the other player
     public function pass() {
-        $stmt = $this->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)');
+        $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "pass", null, null, ?, ?)');
         $setState = $this->model->setState();
         $stmt->bind_param('iis', $this->model->game_id, $this->model->last_move, $setState);
         $stmt->execute();
@@ -230,7 +232,7 @@ class HiveGameController {
 
     // Undo the last move
     public function undo() {
-        $stmt = $this->database->prepare('SELECT * FROM moves WHERE id = ? AND game_id = ?');
+        $stmt = $this->model->database->prepare('SELECT * FROM moves WHERE id = ? AND game_id = ?');
         $stmt->bind_param('ii', $this->last_move, $this->game_id);
         $stmt->execute();
         $this->last_move = $result[5];
