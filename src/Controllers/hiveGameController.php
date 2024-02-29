@@ -15,7 +15,7 @@ class HiveGameController {
         $this->model = $model;
         $this->view = $view;
     }
-
+    
     // Check if there's an error
     public function hasError() {
         return $this->model->error !== null;

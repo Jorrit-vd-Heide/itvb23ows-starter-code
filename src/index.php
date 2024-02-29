@@ -1,17 +1,23 @@
 <?php
 
+// Start the session
 session_start();
 
+// Include necessary files
 include_once '/var/www/html/Models/hiveGameModel.php';
 include_once '/var/www/html/Controllers/hiveGameController.php';
 include_once '/var/www/html/Views/hiveGameView.php';
 include_once '/var/www/html/Models/database.php';
 
+// Retrieve the database object
 $db = retrieveDatabase();
+
+// Initialize game model, view, and controller
 $game = new HiveGameModel($db);
 $view = new HiveGameView($game);
 $controller = new HiveGameController($game, $view);
 
+// Load the session and handle exceptions by redirecting to the restart page
 try {
    $game->loadSession();
 } catch (Exception $e) {
@@ -24,6 +30,7 @@ try {
     <head>
         <title>Hive</title>
         <style>
+            /* Styles for the board and its elements */
             div.board {
                 width: 60%;
                 height: 100%;
@@ -74,11 +81,13 @@ try {
     <body>
         <div class="board">
             <?php
+                // Display the board HTML using the view object
                 echo $view->getBoardHtml();
             ?>
         </div>
 
         <?php
+            // Display each player's hand
             for ($player = 0; $player < 2; $player++) {
                 echo "<div class=\"hand\">";
                 echo $controller->getPlayerName($player).": ";
@@ -90,9 +99,11 @@ try {
         <div class="turn">
             Turn: <?php echo $controller->getPlayerName($controller->getActivePlayer()); ?>
         </div>
+        <!-- Forms for playing, moving, passing, restarting, and undoing actions -->
         <form method="post" action="play.php">
             <select name="piece">
                 <?php
+                    // Generate options for the available pieces in the player's hand
                     foreach ($controller->getHand($controller->getActivePlayer()) as $tile => $ct) {
                         echo "<option value=\"$tile\">$tile</option>";
                     }
@@ -100,6 +111,7 @@ try {
             </select>
             <select name="to">
                 <?php
+                    // Generate options for the possible plays
                     foreach ($controller->getPossiblePlays() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
@@ -110,6 +122,7 @@ try {
         <form method="post" action="move.php">
             <select name="from">
                 <?php
+                     // Generate options for the tiles that can be moved
                     foreach ($controller->getTilesToMove() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }
@@ -117,6 +130,7 @@ try {
             </select>
             <select name="to">
                 <?php
+                    // Generate options for the possible moves
                     foreach ($controller->getPossibleMoves() as $pos) {
                         echo "<option value=\"$pos\">$pos</option>";
                     }

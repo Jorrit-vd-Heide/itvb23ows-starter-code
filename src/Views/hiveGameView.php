@@ -82,6 +82,7 @@ class HiveGameView {
         return explode(',', $pos);
     }
 
+    // Define a public method to get the HTML string representing the player's hand
     public function getHandHtml($player) {
         $html = "";
         $hand = $this->game->hand;
