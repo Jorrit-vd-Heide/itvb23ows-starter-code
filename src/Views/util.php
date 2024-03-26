@@ -52,7 +52,7 @@ function hasNeighBour($a, $board)
 * @param array $board A 2D grid representing the game board
 * @return bool True if the path contains empty tiles, false otherwise
 */
-function pathContainsEmptyTiles($from, $to, $board)
+function checkIfPathContainsEmptyTiles($from, $to, $board)
 {
     $from = explode(',', $from);
     $to = explode(',', $to);

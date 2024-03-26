@@ -194,6 +194,12 @@ class HiveGameController {
                     if (!canSlide($this->model->board, $piece, $to)) {
                         $this->setError('Tile must slide');
                     }
+                } elseif ($tile[1] == "G") {
+                    if (isNeighbour($piece, $to)) {
+                        $this->setError('Jump must be larger then 1');
+                    } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
+                        $this->setError('Path can not contain empty tiles');
+                    }
                 }
             }
         }
