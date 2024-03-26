@@ -9,7 +9,6 @@ class queenBeeTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         // Arrange: Set up any necessary fixtures or dependencies
-        // For example, you can mock the $GLOBALS['OFFSETS'] variable
         $GLOBALS['OFFSETS'] = [[0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1]];
 
         // Mock the model and view
@@ -49,11 +48,11 @@ class queenBeeTest extends TestCase {
         // Set up expectations for the playTile method
         $this->controllerMock->expects($this->once())
                             ->method('playTile')
-                            ->with('S', '0.-3')
+                            ->with('S', '0,-3')
                             ->willReturn("Must play queen bee"); // Simulate the error case when trying to place a tile
 
         // Act: Call the method under test
-        $result = $this->controllerMock->playTile('S', '0.-3');
+        $result = $this->controllerMock->playTile('S', '0,-3');
 
         // Assert: Verify the result against the expected outcome
         $expected = "Must play queen bee"; // Expected error message when trying to place a tile

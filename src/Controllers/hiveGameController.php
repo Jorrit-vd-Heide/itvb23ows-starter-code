@@ -15,7 +15,7 @@ class HiveGameController {
         $this->model = $model;
         $this->view = $view;
     }
-
+    
     // Check if there's an error
     public function hasError() {
         return $this->model->error !== null;
@@ -100,11 +100,8 @@ class HiveGameController {
         return $to;
     }
 
-    // Play a tile on the board
-    public function playTile($piece, $to) {
-        $this->clearError();
-        $hand = $this->getHand($this->getActivePlayer());
-        
+    // Common error checking method
+    private function checkTilePlacementErrors($hand, $piece, $to) {
         if (!$hand[$piece]) {
             $this->setError("Player does not have tile");
         } elseif (isset($this->model->board[$to])) {
@@ -113,9 +110,18 @@ class HiveGameController {
             $this->setError("Board position has no neighbour");
         } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
             $this->setError("Board position has opposing neighbour");
-        } elseif (array_sum($hand) <= 8 && isset($hand['Q']) && $hand['Q'] > 0 && $piece != 'Q')  {
+        } elseif (array_sum($hand) <= 8 && isset($hand['Q']) && $hand['Q'] > 0 && $piece != 'Q') {
             $this->setError("Must play queen bee");
         }
+    }
+
+    // Play a tile on the board
+    public function playTile($piece, $to) {
+        $this->clearError();
+        $hand = $this->getHand($this->getActivePlayer());
+        
+        // Check common errors
+        $this->checkTilePlacementErrors($hand, $piece, $to);
         if ($this->hasError()) return;
 
         $this->model->board[$to] = [[$this->getActivePlayer(), $piece]];
@@ -191,6 +197,12 @@ class HiveGameController {
                 } elseif ($tile[1] == "Q" || $tile[1] == "B") {
                     if (!canSlide($this->model->board, $piece, $to)) {
                         $this->setError('Tile must slide');
+                    }
+                } elseif ($tile[1] == "G") {
+                    if (isNeighbour($piece, $to)) {
+                        $this->setError('Jump must be larger then 1');
+                    } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
+                        $this->setError('Path can not contain empty tiles');
                     }
                 }
             }

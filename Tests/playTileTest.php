@@ -9,7 +9,6 @@ class playTileTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         // Arrange: Set up any necessary fixtures or dependencies
-        // For example, you can mock the $GLOBALS['OFFSETS'] variable
         $GLOBALS['OFFSETS'] = [[0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1]];
 
         // Mock the model and view
@@ -32,10 +31,10 @@ class playTileTest extends TestCase {
         // Set up expectations for the moveTile method
         $this->controllerMock->expects($this->once())
                             ->method('moveTile')
-                            ->with('B', '-1.0')
-                            ->willReturn('B', '-1,0');
+                            ->with('0,-1', '-1,0')
+                            ->willReturn('0,-1', '-1,0');
 
-        $this->controllerMock->moveTile('B', '-1.0'); // Perform the move (move from 0,-1)
+        $this->controllerMock->moveTile('0,-1', '-1,0'); // Perform the move (move from 0,-1)
 
         // Set up expectations for the playTile method
         $this->controllerMock->expects($this->once())

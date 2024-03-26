@@ -1,7 +1,15 @@
 <?php
 
+// An array of offsets used to check neighboring tiles in a 2D grid
 $GLOBALS['OFFSETS'] = [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1]];
 
+/**
+* Checks if two tiles are neighbors in a 2D grid
+*
+* @param string $a A tile represented as a string with format "x,y"
+* @param string $b Another tile represented as a string with format "x,y"
+* @return bool True if the tiles are neighbors, false otherwise
+*/
 function isNeighbour($a, $b)
 {
     $a = explode(',', $a);
@@ -19,6 +27,13 @@ function isNeighbour($a, $b)
     return false;
 }
 
+/**
+* Checks if a tile has a neighboring tile with the same player's piece on the board
+*
+* @param string $a A tile represented as a string with format "x,y"
+* @param array $board A 2D grid representing the game board
+* @return bool True if there is a neighboring tile with the same player's piece, false otherwise
+*/
 function hasNeighBour($a, $board)
 {
     foreach (array_keys($board) as $b) {
@@ -29,7 +44,15 @@ function hasNeighBour($a, $board)
     }
 }
 
-function pathContainsEmptyTiles($from, $to, $board)
+/**
+* Checks if a path from one tile to another contains empty tiles
+*
+* @param string $from A tile represented as a string with format "x,y"
+* @param string $to Another tile represented as a string with format "x,y"
+* @param array $board A 2D grid representing the game board
+* @return bool True if the path contains empty tiles, false otherwise
+*/
+function checkIfPathContainsEmptyTiles($from, $to, $board)
 {
     $from = explode(',', $from);
     $to = explode(',', $to);
@@ -47,6 +70,14 @@ function pathContainsEmptyTiles($from, $to, $board)
     return false;
 }
 
+/**
+* Checks if all neighboring tiles of a given tile have the same player's piece on the board
+*
+* @param string $player The player's identifier
+* @param string $a A tile represented as a string with format "x,y"
+* @param array $board A 2D grid representing the game board
+* @return bool True if all neighboring tiles have the same player's piece, false otherwise
+*/
 function neighboursAreSameColor($player, $a, $board)
 {
     foreach ($board as $b => $st) {
@@ -63,11 +94,27 @@ function neighboursAreSameColor($player, $a, $board)
     return true;
 }
 
+/**
+* Returns the length of a given tile
+*
+* @param array|null $tile A tile represented as an array with format [x, y]
+* @return int The length of the tile, or 0 if the tile is null
+*/
 function len($tile)
 {
     return $tile ? count($tile) : 0;
 }
 
+/**
+* Checks if a tile can slide to another tile under specific conditions
+*
+* @param array $board A 2D grid representing the game board
+* @param string $from A tile represented as a string with format "x,y"
+* @param string $to Another tile represented as a string with format "x,y"
+* @param bool $isBeetle Optional: Whether the sliding piece is a beetle
+* @param bool $isSpider Optional: Whether the sliding piece is a spider
+* @return bool True if the tile can slide to the target tile, false otherwise
+*/
 function canSlide($board, $from, $to, $isBeetle = false, $isSpider = false)
 {
     if (!hasNeighBour($to, $board)) {
@@ -97,52 +144,4 @@ function canSlide($board, $from, $to, $isBeetle = false, $isSpider = false)
     }
     
     return count($common) == 1;
-}
-
-function hasSlidePath($board, $from, $to, $isSpider = false)
-{
-    $toVisit = [$from];
-    $visited = [];
-    $paths = [];
-    $paths[$from] = [[$from]];
-
-    while (count($toVisit) > 0) {
-        $current = array_pop($toVisit);
-
-        if ($current == $to) {
-            $visited[] = $current;
-            
-            if ($isSpider) {
-                foreach ($paths[$current] as $path) {
-                    if (count($path) - 1 == 3) {
-                        return true;
-                    }
-                }
-            } else {
-                return true;
-            }
-        }
-        $visited[] = $current;
-        $currentArr = explode(',', $current);
-        foreach ($GLOBALS['OFFSETS'] as $pq) {
-            $p = $currentArr[0] + $pq[0];
-            $q = $currentArr[1] + $pq[1];
-            $neighbour = $p . "," . $q;
-            if (isset($board[$neighbour])) {
-                continue;
-            }
-            $temp = $board[$from];
-            unset($board[$from]);
-            if (!in_array($neighbour, $visited) && canSlide($board, $current, $neighbour, false, $isSpider)) {
-                $toVisit[] = $neighbour;
-                foreach ($paths[$current] as $path) {
-                    $newPath = $path;
-                    $newPath[] = $neighbour;
-                    $paths[$neighbour][] = $newPath;
-                }
-            } 
-            $board[$from] = $temp;
-        }
-    }
-    return false;
 }

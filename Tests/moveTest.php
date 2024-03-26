@@ -9,7 +9,6 @@ class moveTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         // Arrange: Set up any necessary fixtures or dependencies
-        // For example, you can mock the $GLOBALS['OFFSETS'] variable
         $GLOBALS['OFFSETS'] = [[0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1]];
 
         // Mock the model and view
