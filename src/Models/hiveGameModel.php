@@ -1,6 +1,5 @@
 <?php
 
- // Load the game session from the session data
 class HiveGameModel {
     // Define the properties of the class
     public $game_id = 0;
