@@ -238,7 +238,7 @@ class HiveGameController {
         $setState = $this->model->setState();
         $stmt->bind_param('iis', $this->model->game_id, $this->model->last_move, $setState);
         $stmt->execute();
-        $this->last_move = $this->database->insert_id;
+        $this->model->last_move = $this->model->database->insert_id;
         $this->changePlayer();
     }
 
