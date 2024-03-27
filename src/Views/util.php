@@ -145,3 +145,44 @@ function canSlide($board, $from, $to, $isBeetle = false, $isSpider = false)
     
     return count($common) == 1;
 }
+
+/**
+ * Checks if there is a slide path between two tiles.
+ *
+ * @param array $board A 2D grid representing the game board
+ * @param string $from A tile represented as a string with format "x,y"
+ * @param string $to Another tile represented as a string with format "x,y"
+ *
+ * @return bool True if a slide path exists between the two tiles, false otherwise
+ */
+function availableSlidePath($board, $from, $to)
+{
+    $visited = [];
+    $queue = [$from];
+    
+    while (!empty($queue)) {
+        $current = array_shift($queue);
+        $visited[] = $current;
+
+        if ($current === $to) {
+            return true;
+        }
+
+        $currentArr = explode(',', $current);
+        foreach ($GLOBALS['OFFSETS'] as $pq) {
+            $p = $currentArr[0] + $pq[0];
+            $q = $currentArr[1] + $pq[1];
+            $neighbour = $p . "," . $q;
+
+            if (isset($board[$neighbour]) || in_array($neighbour, $visited)) {
+                continue;
+            }
+            
+            if (canSlide($board, $current, $neighbour)) {
+                $queue[] = $neighbour;
+            }
+        }
+    }
+
+    return false;
+}

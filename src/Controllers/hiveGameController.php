@@ -195,7 +195,7 @@ class HiveGameController {
                 } elseif (isset($this->model->board[$to]) && $tile[1] != "B") {
                     $this->setError('Tile not empty');
                 } elseif ($tile[1] == "Q" || $tile[1] == "B") {
-                    if (!canSlide($this->model->board, $piece, $to)) {
+                    if (!canSlide($this->model->board, $piece, $to, $tile[1] == "B")) {
                         $this->setError('Tile must slide');
                     }
                 } elseif ($tile[1] == "G") {
@@ -204,6 +204,10 @@ class HiveGameController {
                     } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
                         $this->setError('Path can not contain empty tiles');
                     }
+                } elseif ($tile[1] == "A"){
+                    if (!canSlide($this->model->board, $piece, $to)){
+                        $this->setError('Tile has to perform slide move');
+                    } 
                 }
             }
         }
@@ -238,7 +242,7 @@ class HiveGameController {
         $setState = $this->model->setState();
         $stmt->bind_param('iis', $this->model->game_id, $this->model->last_move, $setState);
         $stmt->execute();
-        $this->last_move = $this->database->insert_id;
+        $this->model->last_move = $this->model->database->insert_id;
         $this->changePlayer();
     }
 
