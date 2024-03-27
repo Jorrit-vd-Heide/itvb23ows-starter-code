@@ -40,14 +40,14 @@ class soldierAntTest extends TestCase {
     
     public function testSoldierAntUnlimitedMoves() {
         // Arrange: Set up the initial state of the board
-        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'S', '0,2' => 'B'];
+        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'A', '0,2' => 'B'];
 
         $this->controllerMock->expects($this->once())
                              ->method('moveTile')
-                             ->with('0,-1', '-1,-1'); // Expecting soldierAnt to move from 0,-1 to -1,-1
+                             ->with('0,-1', '-1,0'); // Expecting soldierAnt to move from 0,-1 to -1,0
 
         // Act: Perform the grasshopper movement
-        $this->controllerMock->moveTile('0,-1', '-1,-1');
+        $this->controllerMock->moveTile('0,-1', '-1,0');
 
         // Assertion: Verify that the movement was successful and there are no errors
         $this->assertFalse($this->controllerMock->hasError());
@@ -56,30 +56,30 @@ class soldierAntTest extends TestCase {
 
     public function testSoldierAntCanOnlyMoveToEmptySpaces() {
         // Arrange: Set up the initial state of the board
-        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'S', '0,2' => 'B'];
+        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'A', '0,2' => 'B'];
 
         $this->controllerMock->expects($this->once())
                              ->method('moveTile')
-                             ->with('0,-1', '0,0'); // Expecting soldierAnt to move from 0,-1 to 0,0
+                             ->with('0,-1', '-1,0'); // Expecting soldierAnt to move from 0,-1 to -1,0
 
         // Act: Perform the grasshopper movement
-        $this->controllerMock->moveTile('0,-1', '0,0');
+        $this->controllerMock->moveTile('0,-1', '-1,0');
 
-        // Assertion: This move should not be successful and should return errors
-        $this->assertTrue($this->controllerMock->hasError());
-        $this->assertNotNull($this->controllerMock->getError());
+        // Assertion: This move should be successful and should return errors
+        $this->assertFalse($this->controllerMock->hasError());
+        $this->assertNull($this->controllerMock->getError());
     }
 
-    public function testSoldierAntMovesAtleastOneTile() {
-        // Arrange: Set up the initial state of the board
-        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'S', '0,2' => 'B'];
+    public function testSoldierAntCanNotMoveToOccupiedPlace(){
+        // Arrange: Set up the initial state of the board (non-empty board)
+        $this->model->board = ['0,0' => 'Q', '0,1' => 'Q', '0,-1' => 'A', '0,2' => 'B'];
 
         $this->controllerMock->expects($this->once())
                              ->method('moveTile')
-                             ->with('0,-1', '0,-1'); // Expecting soldierAnt to move from 0,-1 to 0,0
+                             ->with('0,-1', '0,2'); // Expecting soldierAnt to move from 0,-1 to 0,2
 
         // Act: Perform the grasshopper movement
-        $this->controllerMock->moveTile('0,-1', '0,-1');
+        $this->controllerMock->moveTile('0,-1', '0,2');
 
         // Assertion: This move should not be successful and should return errors
         $this->assertTrue($this->controllerMock->hasError());
