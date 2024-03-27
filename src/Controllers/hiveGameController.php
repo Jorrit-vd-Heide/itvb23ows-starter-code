@@ -155,7 +155,25 @@ class HiveGameController {
     public function moveTile($piece, $to) {
         $this->clearError();
         $hand = $this->getHand($this->getActivePlayer());
-
+    
+        $this->validateTilePlacement($piece, $to, $hand);
+        
+        if ($this->hasError()) return;
+    
+        $tile = array_pop($this->model->board[$piece]);
+        $this->validateMove($piece, $to, $tile);
+    
+        if ($this->hasError()) {
+            $this->restoreOriginalPosition($piece, $tile);
+        } else {
+            $this->placeTileOnBoard($to, $tile);
+            $this->removeOriginalPosition($piece);
+            $this->changePlayer();
+            $this->recordMove($piece, $to);
+        }
+    }
+    
+    private function validateTilePlacement($piece, $to, $hand) {
         if (!isset($this->model->board[$piece])) {
             $this->setError('Board position is empty');
         } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
@@ -167,74 +185,96 @@ class HiveGameController {
         } elseif (isset($hand['Q'])) {
             $this->setError("Queen bee is not played");
         }
-        if ($this->hasError()) return;
-
-        $tile = array_pop($this->model->board[$piece]);
+    }
+    
+    private function validateMove($piece, $to, $tile) {
         if (!hasNeighBour($to, $this->model->board)) {
             $this->setError("Move would split hive");
         } else {
             $all = array_keys($this->model->board);
-            $queue = [array_shift($all)];
-            while ($queue) {
-                $next = explode(',', array_shift($queue));
-                foreach ($GLOBALS['OFFSETS'] as $pq) {
-                    list($p, $q) = $pq;
-                    $p += $next[0];
-                    $q += $next[1];
-                    if (in_array("$p,$q", $all)) {
-                        $queue[] = "$p,$q";
-                        $all = array_diff($all, ["$p,$q"]);
-                    }
-                }
+            $reachableTiles = $this->calculateReachableTiles($all);
+    
+            if ($this->isInvalidMove($piece, $to, $tile, $reachableTiles)) {
+                $this->setError("Invalid move");
             }
-            if ($all) {
-                $this->setError("Move would split hive");
-            } else {
-                if ($piece == $to) {
-                    $this->setError('Tile must move');
-                } elseif (isset($this->model->board[$to]) && $tile[1] != "B") {
-                    $this->setError('Tile not empty');
-                } elseif ($tile[1] == "Q" || $tile[1] == "B") {
-                    if (!canSlide($this->model->board, $piece, $to, $tile[1] == "B")) {
-                        $this->setError('Tile must slide');
-                    }
-                } elseif ($tile[1] == "G") {
-                    if (isNeighbour($piece, $to)) {
-                        $this->setError('Jump must be larger then 1');
-                    } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
-                        $this->setError('Path can not contain empty tiles');
-                    }
-                } elseif ($tile[1] == "A"){
-                    if (!canSlide($this->model->board, $piece, $to)){
-                        $this->setError('Tile has to perform slide move');
-                    } 
-                }
-            }
-        }
-        if ($this->hasError()) {
-            if (isset($this->model->board[$piece])) {
-                array_push($this->model->board[$piece], $tile);
-            } else {
-                $this->model->board[$piece] = [$tile];
-            }
-        } else {
-            if (isset($this->model->board[$to])) {
-                array_push($this->model->board[$to], $tile);
-            } else {
-                $this->model->board[$to] = [$tile];
-            }
-            // Remove the original position from the board
-            if (count($this->model->board[$piece]) == 0){
-                unset($this->model->board[$piece]);
-            }
-            $this->changePlayer();
-            $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
-            $setState = $this->model->setState();
-            $stmt->bind_param('issis', $this->model->game_id, $piece, $to, $this->model->last_move, $setState);
-            $stmt->execute();
-            $this->model->last_move = $this->model->database->insert_id;
         }
     }
+    
+    private function calculateReachableTiles($hive) {
+        $reachableTiles = [];
+        $queue = [array_shift($hive)];
+    
+        while ($queue) {
+            $next = explode(',', array_shift($queue));
+            foreach ($GLOBALS['OFFSETS'] as $pq) {
+                list($p, $q) = $pq;
+                $p += $next[0];
+                $q += $next[1];
+                if (in_array("$p,$q", $hive)) {
+                    $queue[] = "$p,$q";
+                    $hive = array_diff($hive, ["$p,$q"]);
+                    $reachableTiles[] = "$p,$q";
+                }
+            }
+        }
+    
+        return $reachableTiles;
+    }
+    
+    private function isInvalidMove($piece, $to, $tile, $reachableTiles) {
+        if ($piece == $to) {
+            return true; // Tile must move
+        } elseif (isset($this->model->board[$to]) && $tile[1] != "B") {
+            return true; // Tile not empty
+        } elseif ($tile[1] == "Q" || $tile[1] == "B") {
+            if (!canSlide($this->model->board, $piece, $to, $tile[1] == "B")) {
+                return true; // Tile must slide
+            }
+        } elseif ($tile[1] == "G") {
+            if (isNeighbour($piece, $to)) {
+                return true; // Jump must be larger than 1
+            } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
+                return true; // Path can not contain empty tiles
+            }
+        } elseif ($tile[1] == "A") {
+            if (!canSlide($this->model->board, $piece, $to)){
+                return true; // Tile has to perform slide move
+            } 
+        }
+    
+        return false; // Move is valid
+    }
+    
+    private function restoreOriginalPosition($piece, $tile) {
+        if (isset($this->model->board[$piece])) {
+            array_push($this->model->board[$piece], $tile);
+        } else {
+            $this->model->board[$piece] = [$tile];
+        }
+    }
+    
+    private function placeTileOnBoard($to, $tile) {
+        if (isset($this->model->board[$to])) {
+            array_push($this->model->board[$to], $tile);
+        } else {
+            $this->model->board[$to] = [$tile];
+        }
+    }
+    
+    private function removeOriginalPosition($piece) {
+        if (count($this->model->board[$piece]) == 0){
+            unset($this->model->board[$piece]);
+        }
+    }
+    
+    private function recordMove($piece, $to) {
+        $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
+        $setState = $this->model->setState();
+        $stmt->bind_param('issis', $this->model->game_id, $piece, $to, $this->model->last_move, $setState);
+        $stmt->execute();
+        $this->model->last_move = $this->model->database->insert_id;
+    }
+    
 
     // Pass the turn to the other player
     public function pass() {
