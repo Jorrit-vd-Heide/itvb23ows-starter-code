@@ -272,22 +272,22 @@ class HiveGameController {
     
     private function isInvalidMove($piece, $to, $tile, $reachableTiles) {
         if ($piece == $to) {
-            return true; // Tile must move
+            $this->setError('Tile must move');
         } elseif (isset($this->model->board[$to]) && $tile[1] != "B") {
-            return true; // Tile not empty
+            $this->setError('Tile not empty');
         } elseif ($tile[1] == "Q" || $tile[1] == "B") {
             if (!canSlide($this->model->board, $piece, $to, $tile[1] == "B")) {
-                return true; // Tile must slide
+                $this->setError('Tile must slide');
             }
         } elseif ($tile[1] == "G") {
             if (isNeighbour($piece, $to)) {
-                return true; // Jump must be larger than 1
+                $this->setError('Jump must be larger than 1');
             } elseif (checkIfPathContainsEmptyTiles($piece, $to, $this->model->board)) {
-                return true; // Path can not contain empty tiles
+                $this->setError('Path can not contain empty tiles');
             }
         } elseif ($tile[1] == "A") {
             if (!canSlide($this->model->board, $piece, $to)){
-                return true; // Tile has to perform slide move
+                $this->setError('Tile has to perform slide move');
             } 
         }
     
