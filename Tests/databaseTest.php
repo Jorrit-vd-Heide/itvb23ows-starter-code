@@ -7,7 +7,7 @@ class DatabaseTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->db = new mysqli('127.0.0.1', 'root', 'password', 'hive');
+        $this->db = new mysqli('127.0.0.1', 'root', '', 'hive');
         if ($this->db->connect_error) {
             die("Connection failed: " . $this->db->connect_error);
         }
