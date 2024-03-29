@@ -40,6 +40,6 @@ class gameOverTest extends TestCase {
                              ->willReturn('A', '1,-1');
 
         // Assertion: Pass should not be successful and should return errors
-        $this->assertTrue($controllerMock->gameOver());
+        $this->assertTrue($controllerMock->determineWinner());
     }
 }
