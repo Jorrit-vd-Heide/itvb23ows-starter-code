@@ -178,6 +178,15 @@ class HiveGameController {
         $stmt->bind_param('issis', $this->model->game_id, $piece, $to, $this->model->last_move, $setState);
         $stmt->execute();
         $this->model->last_move = $this->model->database->insert_id;
+
+        // Check for winner after playing a tile
+        $winner = $this->determineWinner();
+        if ($winner) {
+            return $winner; // Return the winner if the game is won
+        }
+
+        // If no winner, return null
+        return null;
     }
 
     // Get movable tiles
@@ -221,6 +230,15 @@ class HiveGameController {
             $this->changePlayer();
             $this->recordMove($piece, $to);
         }
+
+        // Check for winner after moving a tile
+        $winner = $this->determineWinner();
+        if ($winner) {
+            return $winner; // Return the winner if the game is won
+        }
+
+        // If no winner, return null
+        return null;
     }
 
     // Check if the board position is empty
@@ -414,6 +432,38 @@ class HiveGameController {
         $stmt = $this->model->database->prepare($insertQuery);
         $stmt->execute();
         $this->model->game_id = $this->model->database->insert_id;
+    }
+
+    // Add hive winner logic
+    public function determineWinner() {
+        // Check if the white queen bee is surrounded by black tiles
+        $whiteQueenPosition = array_search('Q', $this->model->board[0] ?? []);
+        if ($whiteQueenPosition !== false && !checkIfNeigbourIsSameColor(0, $whiteQueenPosition, $this->model->board)) {
+            return 'Black';
+        }
+
+        // Check if the black queen bee is surrounded by white tiles
+        $blackQueenPosition = array_search('Q', $this->model->board[1] ?? []);
+        if ($blackQueenPosition !== false && !checkIfNeigbourIsSameColor(1, $blackQueenPosition, $this->model->board)) {
+            return 'White';
+        }
+
+        // Check for tie (stalemate)
+        if ($this->isStalemate()) {
+            return 'Tie';
+        }
+
+        // If none of the above conditions are met, the game is still ongoing
+        return null;
+    }
+
+    // Check for stalemate
+    private function isStalemate() {
+        // Check if there are any movable tiles left on the board
+        $movableTiles = $this->getTilesToMove();
+
+        // If there are movable tiles left, the game is not in a stalemate
+        return empty($movableTiles);
     }
 
 }
