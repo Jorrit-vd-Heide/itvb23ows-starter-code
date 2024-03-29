@@ -84,25 +84,23 @@ function checkIfPathContainsEmptyTiles($from, $to, $board)
  */
 function checkIfNeigbourIsSameColor($player, $tile, $board)
 {
-    // Define the neighboring positions relative to the current tile
-    $neighbourOffsets = [
-        [-1, 0], [1, 0], [0, -1], [0, 1], // Horizontal and vertical neighbors
-        [-1, -1], [-1, 1], [1, -1], [1, 1], // Diagonal neighbors
-    ];
-
-    // Iterate over the neighboring positions
-    foreach ($neighbourOffsets as $offset) {
-        [$x, $y] = explode(',', $tile);
-        [$dx, $dy] = $offset;
-        $neighbourTile = ($x + $dx) . ',' . ($y + $dy);
-
-        // Check if the neighboring tile is within the board and has a different player's piece
-        if (isset($board[$neighbourTile]) && end($board[$neighbourTile])[0] !== $player) {
-            return false; // If any neighboring tile has a different player's piece, return false
+    foreach ($board as $position => $stack) {
+        // Skip empty positions
+        if (empty($stack)) {
+            continue;
+        }
+    
+        // Get the color of the top tile in the stack
+        $topTileColor = $stack[count($stack) - 1][0];
+    
+        // Check if the top tile belongs to the opponent and if it's a neighbor of the given position
+        if ($topTileColor != $player && isNeighbour($tile, $position)) {
+            return false;
         }
     }
-
-    return true; // If all neighboring tiles have the same player's piece, return true
+    
+    // If no opposing neighbor found, return true
+    return true;
 }
 
 
@@ -184,16 +182,16 @@ function availableSlidePath($board, $from, $to, $isSpider = false)
         $visited[$current] = true;
 
         // Explore each neighbor of the current tile
-        foreach (getNeighbors($current) as $neighbor) {
+        foreach (getNeighbours($current) as $neighbour) {
             // Check if the neighbor is a valid move and has not been visited
-            if (isValidMove($board, $current, $neighbor) && !isset($visited[$neighbor])) {
+            if (isValidMove($board, $current, $neighbour) && !isset($visited[$neighbour])) {
                 // Record the path to the neighbor
-                $paths[$neighbor] = array_map(function ($path) use ($neighbor) {
-                    return [...$path, $neighbor];
+                $paths[$neighbour] = array_map(function ($path) use ($neighbour) {
+                    return [...$path, $neighbour];
                 }, $paths[$current] ?? [[$current]]);
 
                 // Recursively explore the neighbor
-                if (explorePath($board, $neighbor, $target, $visited, $paths, $isSpider)) {
+                if (explorePath($board, $neighbour, $target, $visited, $paths, $isSpider)) {
                     return true; // If a path is found, return true
                 }
             }
