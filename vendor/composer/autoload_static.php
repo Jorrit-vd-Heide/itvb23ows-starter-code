@@ -913,7 +913,6 @@ class ComposerStaticInit48318ab36a580be9e1c12fea86d56383
         'PHPUnit\\Util\\PHP\\AbstractPhpProcess' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/PHP/AbstractPhpProcess.php',
         'PHPUnit\\Util\\PHP\\DefaultPhpProcess' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/PHP/DefaultPhpProcess.php',
         'PHPUnit\\Util\\PHP\\PhpProcessException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/Exception/PhpProcessException.php',
-        'PHPUnit\\Util\\PHP\\WindowsPhpProcess' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/PHP/WindowsPhpProcess.php',
         'PHPUnit\\Util\\Reflection' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/Reflection.php',
         'PHPUnit\\Util\\Test' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/Test.php',
         'PHPUnit\\Util\\ThrowableToStringMapper' => __DIR__ . '/..' . '/phpunit/phpunit/src/Util/ThrowableToStringMapper.php',
@@ -1206,8 +1205,11 @@ class ComposerStaticInit48318ab36a580be9e1c12fea86d56383
         'dropDownTest' => __DIR__ . '/../..' . '/Tests/dropDownTest.php',
         'grassHopperTest' => __DIR__ . '/../..' . '/Tests/grassHopperTest.php',
         'moveTest' => __DIR__ . '/../..' . '/Tests/moveTest.php',
+        'passTest' => __DIR__ . '/../..' . '/Tests/passTest.php',
         'playTileTest' => __DIR__ . '/../..' . '/Tests/playTileTest.php',
         'queenBeeTest' => __DIR__ . '/../..' . '/Tests/queenBeeTest.php',
+        'soldierAntTest' => __DIR__ . '/../..' . '/Tests/soldierAntTest.php',
+        'spiderTest' => __DIR__ . '/../..' . '/Tests/spiderTest.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

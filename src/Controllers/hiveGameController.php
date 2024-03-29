@@ -360,10 +360,27 @@ class HiveGameController {
         $this->model->last_move = $this->model->database->insert_id;
     }
     
-    
-
     // Pass the turn to the other player
     public function pass() {
+        // Get the active player's hand
+        $activePlayerHand = $this->getHand($this->getActivePlayer());
+
+        // Check if the active player has plays available
+        if (count($activePlayerHand) > 0) {
+            $this->setError('Player still has plays available');
+            return;
+        }
+
+        // Check if moves are possible
+        $movableTiles = $this->getTilesToMove();
+
+        foreach ($movableTiles as $tile) {
+            if ($this->attemptMove($tile)) {
+                $this->setError('Player still has moves available');
+                return;
+            }
+        }
+
         $insertQuery = 'INSERT INTO moves (game_id, type, move_from, move_to, previous_id, state) VALUES (?, "pass", null, null, ?, ?)';
         $stmt = $this->model->database->prepare($insertQuery);
         $setState = $this->model->setState();
