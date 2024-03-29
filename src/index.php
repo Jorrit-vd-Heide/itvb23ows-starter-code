@@ -144,10 +144,16 @@ try {
         <form method="post" action="restart.php">
             <input type="submit" value="Restart">
         </form>
-        <ol>
-            <?php
-            ?>
-        </ol>
+        <strong><?php 
+            if ($controller->hasError()) {
+                echo $controller->getError();
+                $controller->clearError();
+            }
+        ?></strong>
+        <strong><?php 
+
+        ?>
+        </strong>
         <form method="post" action="undo.php">
             <input type="submit" value="Undo">
         </form>
