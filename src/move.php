@@ -1,41 +1,48 @@
 <?php
-// Start a new session to store game data
 session_start();
 
-// Include the necessary models, controllers, and views for the Hive game
+// Include necessary files
 include_once '/var/www/html/Models/hiveGameModel.php';
 include_once '/var/www/html/Controllers/hiveGameController.php';
 include_once '/var/www/html/Views/hiveGameView.php';
 include_once '/var/www/html/Models/database.php';
 
-// Retrieve the piece to be moved and the destination tile
-$piece = $_POST['from'];
-$to = $_POST['to'];
-
-// Create a new database instance and a new Hive game model
-$db = retrieveDatabase();
-$game = new HiveGameModel($db);
-
-// Create a new Hive game view and controller
-$view = new HiveGameView($game);
-$controller = new HiveGameController($game, $view);
-
-// Load the game session data
-try {
-    $game->loadSession();
-} catch (Exception $e) {
-    // If there is an error loading the session data, store the error message in the session variable
-    $_SESSION['error'] = $e->getMessage();
-    // Redirect the user to the index page
+// Function to handle errors and redirect
+function handleErrorAndRedirect($errorMessage) {
+    $_SESSION['error'] = $errorMessage;
     header('Location: index.php');
     exit;
 }
 
-// Move the selected piece to the destination tile
-$controller->moveTile($piece, $to);
+// Retrieve POST data
+$piece = $_POST['from'] ?? null;
+$to = $_POST['to'] ?? null;
 
-// Save the updated game state
-$game->saveState();
+// Check if required data is provided
+if (!$piece || !$to) {
+    handleErrorAndRedirect('Invalid move: missing piece or destination.');
+}
 
-// Redirect the user to the index page
+// Create instances
+$db = retrieveDatabase();
+$game = new HiveGameModel($db);
+$view = new HiveGameView($game);
+$controller = new HiveGameController($game, $view);
+
+try {
+    // Load game session data
+    $game->loadSession();
+    
+    // Move the piece
+    $controller->moveTile($piece, $to);
+    
+    // Save the updated game state
+    $game->saveState();
+} catch (Exception $e) {
+    // Handle exceptions
+    handleErrorAndRedirect($e->getMessage());
+}
+
+// Redirect to index page
 header('Location: index.php');
+exit;

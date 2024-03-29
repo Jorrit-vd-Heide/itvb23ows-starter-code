@@ -3,29 +3,38 @@
 // Start a new session to store game data
 session_start();
 
-// Include the necessary models, controllers, and views
+// Include necessary files
 include_once '/var/www/html/Models/hiveGameModel.php';
 include_once '/var/www/html/Controllers/hiveGameController.php';
 include_once '/var/www/html/Views/hiveGameView.php';
 include_once '/var/www/html/Models/database.php';
 
-// Retrieve the database connection
+// Function to handle errors and redirect
+function handleErrorAndRedirect($errorMessage) {
+    $_SESSION['error'] = $errorMessage;
+    header('Location: index.php');
+    exit;
+}
+
+// Retrieve database connection
 $db = retrieveDatabase();
 
-// Create a new HiveGameModel instance with the database connection
+// Create instances
 $game = new HiveGameModel($db);
-
-// Create a new HiveGameView instance with the game model
 $view = new HiveGameView($game);
-
-// Create a new HiveGameController instance with the game model and view
 $controller = new HiveGameController($game, $view);
 
-// Restart the game
-$controller->restart();
+try {
+    // Restart the game
+    $controller->restart();
 
-// Save the current game state
-$game->saveState();
+    // Save the current game state
+    $game->saveState();
+} catch (Exception $e) {
+    // Handle exceptions
+    handleErrorAndRedirect($e->getMessage());
+}
 
-// Redirect the user to the index page
+// Redirect to index page
 header('Location: index.php');
+exit;

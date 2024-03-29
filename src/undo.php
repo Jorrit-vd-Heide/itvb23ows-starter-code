@@ -3,41 +3,41 @@
 // Start a new session to store the game state
 session_start();
 
-// Include the necessary classes for the game
+// Include necessary files
 include_once '/var/www/html/Models/hiveGameModel.php';
 include_once '/var/www/html/Controllers/hiveGameController.php';
 include_once '/var/www/html/Views/hiveGameView.php';
 include_once '/var/www/html/Models/database.php';
 
-// Retrieve the database connection
-$db = retrieveDatabase();
-
-// Create a new game model with the database connection
-$game = new HiveGameModel($db);
-
-// Create a new game view with the game model
-$view = new HiveGameView($game);
-
-// Create a new game controller with the game model and game view
-$controller = new HiveGameController($game, $view);
-
-// Try to load the game state from the session
-try {
-    $game->loadSession();
-} catch (Exception $e) {
-    // If there is an error loading the game state, store the error message in the session
-    $_SESSION['error'] = $e->getMessage();
-
-    // Redirect the user to the index page
+// Function to handle errors and redirect
+function handleErrorAndRedirect($errorMessage) {
+    $_SESSION['error'] = $errorMessage;
     header('Location: index.php');
     exit;
 }
 
-// Call the undo method on the game controller to undo the last move
-$controller->undo();
+// Retrieve database connection
+$db = retrieveDatabase();
 
-// Save the updated game state to the session
-$game->saveStateToSession();
+// Create instances
+$game = new HiveGameModel($db);
+$view = new HiveGameView($game);
+$controller = new HiveGameController($game, $view);
 
-// Redirect the user to the index page
+try {
+    // Load game state from session
+    $game->loadSession();
+    
+    // Undo the last move
+    $controller->undo();
+    
+    // Save updated game state to session
+    $game->saveStateToSession();
+} catch (Exception $e) {
+    // Handle exceptions
+    handleErrorAndRedirect($e->getMessage());
+}
+
+// Redirect to index page
 header('Location: index.php');
+exit;
