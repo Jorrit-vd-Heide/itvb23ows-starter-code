@@ -410,16 +410,73 @@ class HiveGameController {
 
     // Undo the last move
     public function undo() {
+        // Fetch the details of the last move from the database
         $selectQuery = 'SELECT * FROM moves WHERE id = ? AND game_id = ?';
         $stmt = $this->model->database->prepare($selectQuery);
         $stmt->bind_param('ii', $this->model->last_move, $this->model->game_id);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
-        if ($result) {
-            $this->model->last_move = $result['previous_id'];
-            $this->getState($result['state']);
+        
+        // Check if the query returned any result
+        if (!$result) {
+            $this->setError('No moves to undo');
+            return;
         }
+        
+        // Check if the move being undone is the first move of the game
+        if ($result['previous_id'] === null) {
+            $this->setError('Cannot undo the first move of the game');
+            return;
+        }
+        
+        // Determine the type of the last move
+        $moveType = $result['type'];
+        
+        // Depending on the move type, revert the move
+        switch ($moveType) {
+            case 'play':
+                // Retrieve the tile placed on the board
+                $piece = $result['move_to'];
+                $tile = array_pop($this->model->board[$piece]);
+                
+                // Add the tile back to the player's hand
+                $this->model->hand[$this->getActivePlayer()][$tile[1]]++;
+                
+                // Remove the tile from the board
+                unset($this->model->board[$piece]);
+                break;
+            
+            case 'move':
+                // Retrieve the tile moved on the board
+                $piece = $result['move_to'];
+                $tile = array_pop($this->model->board[$piece]);
+                
+                // Retrieve the original position of the tile
+                $originalPosition = $result['move_from'];
+                
+                // Remove the tile from the destination position
+                unset($this->model->board[$piece]);
+                
+                // Add the tile back to the original position on the board
+                $this->model->board[$originalPosition][] = $tile;
+                break;
+            
+            case 'pass':
+                // If the last move was a pass, do not change the active player
+                break;
+        }
+        
+        // If the last move was not a pass, update the last move ID to the previous move ID
+        if ($moveType !== 'pass') {
+            $this->model->last_move = $result['previous_id'];
+            // Change the active player back to the player who made the last move
+            $this->model->activePlayer = 1 - $this->model->activePlayer; 
+        }
+        
+        // Set the game state based on the state stored in the database
+        $this->model->setState($result['state']);
     }
+
 
     // Restart the game
     public function restart() {
