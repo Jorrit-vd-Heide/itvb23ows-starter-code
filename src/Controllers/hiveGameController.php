@@ -128,7 +128,7 @@ class HiveGameController {
                 }
     
                 // Check if neighbors are of the same color
-                if (array_sum($hand) < 11 && !neighboursAreSameColor($activePlayer, $newPos, $this->model->board)) {
+                if (array_sum($hand) < 11 && !checkIfNeigbourIsSameColor($activePlayer, $newPos, $this->model->board)) {
                     continue;
                 }
     
@@ -154,7 +154,7 @@ class HiveGameController {
             $this->setError('Board position is not empty');
         } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
             $this->setError("Board position has no neighbour");
-        } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
+        } elseif (array_sum($hand) < 11 && !checkIfNeigbourIsSameColor($this->getActivePlayer(), $to, $this->model->board)) {
             $this->setError("Board position has opposing neighbour");
         } elseif (array_sum($hand) <= 8 && isset($hand['Q']) && $hand['Q'] > 0 && $piece != 'Q') {
             $this->setError("Must play queen bee");
@@ -180,6 +180,7 @@ class HiveGameController {
         $this->model->last_move = $this->model->database->insert_id;
     }
 
+    // Get movable tiles
     public function getTilesToMove() {
         $activePlayer = $this->getActivePlayer();
         $tilesToMove = [];
@@ -221,45 +222,65 @@ class HiveGameController {
             $this->recordMove($piece, $to);
         }
     }
-    
+
+    // Check if the board position is empty
     private function validateTilePlacement($piece, $to, $hand) {
         if (!isset($this->model->board[$piece])) {
             $this->setError('Board position is empty');
-        } elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
+        } 
+        // Check if the board position has no neighbor
+        elseif (count($this->model->board) && !hasNeighBour($to, $this->model->board)) {
             $this->setError("Board position has no neighbour");
-        } elseif (array_sum($hand) < 11 && !neighboursAreSameColor($this->getActivePlayer(), $to, $this->model->board)) {
+        } 
+        // Check if the board position has opposing neighbor
+        elseif (array_sum($hand) < 11 && !checkIfNeigbourIsSameColor($this->getActivePlayer(), $to, $this->model->board)) {
             $this->setError("Board position has opposing neighbour");    
-        } elseif ($this->model->board[$piece][count($this->model->board[$piece]) - 1][0] != $this->getActivePlayer()) {
+        } 
+        // Check if the player owns the tile
+        elseif ($this->model->board[$piece][count($this->model->board[$piece]) - 1][0] != $this->getActivePlayer()) {
             $this->setError("You do not own this tile");
-        } elseif (isset($hand['Q'])) {
+        } 
+        // Check if the queen bee is not played
+        elseif (isset($hand['Q'])) {
             $this->setError("Queen bee is not played");
         }
     }
-    
+
+    // Check if the move would split the hive
     private function validateMove($piece, $to, $tile) {
         if (!hasNeighBour($to, $this->model->board)) {
             $this->setError("Move would split hive");
         } else {
+            // Get all positions on the board
             $all = array_keys($this->model->board);
+            // Calculate reachable tiles
             $reachableTiles = $this->calculateReachableTiles($all);
     
+            // Check if the move is invalid
             if ($this->isInvalidMove($piece, $to, $tile, $reachableTiles)) {
                 $this->setError("Invalid move");
             }
         }
     }
-    
+
+    // Initialize reachable tiles array
     private function calculateReachableTiles($hive) {
         $reachableTiles = [];
+        // Initialize queue with a hive position
         $queue = [array_shift($hive)];
     
+        // Traverse the hive using BFS
         while ($queue) {
+            // Get the next position from the queue
             $next = explode(',', array_shift($queue));
+            // Iterate over neighbor offsets
             foreach ($GLOBALS['OFFSETS'] as $pq) {
                 list($p, $q) = $pq;
                 $p += $next[0];
                 $q += $next[1];
+                // Check if the neighbor position is in the hive
                 if (in_array("$p,$q", $hive)) {
+                    // Add the neighbor position to the queue and reachable tiles
                     $queue[] = "$p,$q";
                     $hive = array_diff($hive, ["$p,$q"]);
                     $reachableTiles[] = "$p,$q";
@@ -267,9 +288,11 @@ class HiveGameController {
             }
         }
     
+        // Return reachable tiles
         return $reachableTiles;
     }
-    
+
+    // Check different conditions for invalid moves and set error messages
     private function isInvalidMove($piece, $to, $tile, $reachableTiles) {
         if ($piece == $to) {
             $this->setError('Tile must move');
@@ -286,36 +309,49 @@ class HiveGameController {
                 $this->setError('Path can not contain empty tiles');
             }
         } elseif ($tile[1] == "A") {
-            if (!canSlide($this->model->board, $piece, $to)){
+            if (!availableSlidePath($this->model->board, $piece, $to, false)){
                 $this->setError('Tile has to perform slide move');
             } 
+        } elseif ($tile[1] == "S") {
+            if (!availableSlidePath($this->model->board, $piece, $to, true)) {
+                $this->setError('Tile must slide exactly 3 tiles');
+            }
         }
     
         return false; // Move is valid
     }
-    
+
+    // Check if the original position exists on the board
     private function restoreOriginalPosition($piece, $tile) {
         if (isset($this->model->board[$piece])) {
+            // Push the tile back to the original position
             array_push($this->model->board[$piece], $tile);
         } else {
+            // Set the original position with the tile
             $this->model->board[$piece] = [$tile];
         }
     }
-    
+
+    // Check if the destination position exists on the board
     private function placeTileOnBoard($to, $tile) {
         if (isset($this->model->board[$to])) {
+            // Push the tile to the destination position
             array_push($this->model->board[$to], $tile);
         } else {
+            // Set the destination position with the tile
             $this->model->board[$to] = [$tile];
         }
     }
-    
+
+    // Check if the original position has no tiles
     private function removeOriginalPosition($piece) {
         if (count($this->model->board[$piece]) == 0){
+            // Remove the original position from the board
             unset($this->model->board[$piece]);
         }
     }
-    
+
+    // Prepare and execute SQL statement to record the move
     private function recordMove($piece, $to) {
         $stmt = $this->model->database->prepare('insert into moves (game_id, type, move_from, move_to, previous_id, state) values (?, "move", ?, ?, ?, ?)');
         $setState = $this->model->setState();
@@ -323,6 +359,7 @@ class HiveGameController {
         $stmt->execute();
         $this->model->last_move = $this->model->database->insert_id;
     }
+    
     
 
     // Pass the turn to the other player

@@ -45,54 +45,66 @@ function hasNeighBour($a, $board)
 }
 
 /**
-* Checks if a path from one tile to another contains empty tiles
-*
-* @param string $from A tile represented as a string with format "x,y"
-* @param string $to Another tile represented as a string with format "x,y"
-* @param array $board A 2D grid representing the game board
-* @return bool True if the path contains empty tiles, false otherwise
-*/
+ * Checks if a path from one tile to another contains empty tiles
+ *
+ * @param string $from A tile represented as a string with format "x,y"
+ * @param string $to Another tile represented as a string with format "x,y"
+ * @param array $board A 2D grid representing the game board
+ * @return bool True if the path contains empty tiles, false otherwise
+ */
 function checkIfPathContainsEmptyTiles($from, $to, $board)
 {
+    // Convert tile coordinates to arrays
     $from = explode(',', $from);
     $to = explode(',', $to);
 
-    $dir = [$from[0] > $to[0] ? -1 : ($from[0] < $to[0] ? 1 : 0),
-            $from[1] > $to[1] ? -1 : ($from[1] < $to[1] ? 1 : 0)];
+    // Determine the direction of movement
+    $dx = $from[0] <=> $to[0];
+    $dy = $from[1] <=> $to[1];
 
-    while ($from[0] != $to[0] || $from[1] != $to[1]) {
-        if (!isset($board[$from[0] . "," . $from[1]])) {
-            return true;
+    // Iterate over the tiles along the path
+    for ($x = $from[0], $y = $from[1]; $x != $to[0] || $y != $to[1]; $x += $dx, $y += $dy) {
+        // Check if the tile is empty
+        if (!isset($board["$x,$y"])) {
+            return true; // Path contains empty tiles
         }
-        $from[0] += $dir[0];
-        $from[1] += $dir[1];
     }
-    return false;
+
+    return false; // Path does not contain empty tiles
 }
+
 
 /**
-* Checks if all neighboring tiles of a given tile have the same player's piece on the board
-*
-* @param string $player The player's identifier
-* @param string $a A tile represented as a string with format "x,y"
-* @param array $board A 2D grid representing the game board
-* @return bool True if all neighboring tiles have the same player's piece, false otherwise
-*/
-function neighboursAreSameColor($player, $a, $board)
+ * Checks if all neighboring tiles of a given tile have the same player's piece on the board
+ *
+ * @param string $player The player's identifier
+ * @param string $tile A tile represented as a string with format "x,y"
+ * @param array $board A 2D grid representing the game board
+ * @return bool True if all neighboring tiles have the same player's piece, false otherwise
+ */
+function checkIfNeigbourIsSameColor($player, $tile, $board)
 {
-    foreach ($board as $b => $st) {
-        if (!$st) {
-            continue;
-        }
+    // Define the neighboring positions relative to the current tile
+    $neighbourOffsets = [
+        [-1, 0], [1, 0], [0, -1], [0, 1], // Horizontal and vertical neighbors
+        [-1, -1], [-1, 1], [1, -1], [1, 1], // Diagonal neighbors
+    ];
 
-        $c = $st[count($st) - 1][0];
-        if ($c != $player && isNeighbour($a, $b)) {
-            return false;
-        }
+    // Iterate over the neighboring positions
+    foreach ($neighbourOffsets as $offset) {
+        [$x, $y] = explode(',', $tile);
+        [$dx, $dy] = $offset;
+        $neighbourTile = ($x + $dx) . ',' . ($y + $dy);
 
+        // Check if the neighboring tile is within the board and has a different player's piece
+        if (isset($board[$neighbourTile]) && end($board[$neighbourTile])[0] !== $player) {
+            return false; // If any neighboring tile has a different player's piece, return false
+        }
     }
-    return true;
+
+    return true; // If all neighboring tiles have the same player's piece, return true
 }
+
 
 /**
 * Returns the length of a given tile
@@ -106,44 +118,47 @@ function len($tile)
 }
 
 /**
-* Checks if a tile can slide to another tile under specific conditions
-*
-* @param array $board A 2D grid representing the game board
-* @param string $from A tile represented as a string with format "x,y"
-* @param string $to Another tile represented as a string with format "x,y"
-* @param bool $isBeetle Optional: Whether the sliding piece is a beetle
-* @param bool $isSpider Optional: Whether the sliding piece is a spider
-* @return bool True if the tile can slide to the target tile, false otherwise
-*/
+ * Checks if a tile can slide to another tile under specific conditions
+ *
+ * @param array $board A 2D grid representing the game board
+ * @param string $from A tile represented as a string with format "x,y"
+ * @param string $to Another tile represented as a string with format "x,y"
+ * @param bool $isBeetle Optional: Whether the sliding piece is a beetle
+ * @param bool $isSpider Optional: Whether the sliding piece is a spider
+ * @return bool True if the tile can slide to the target tile, false otherwise
+ */
 function canSlide($board, $from, $to, $isBeetle = false, $isSpider = false)
 {
-    if (!hasNeighBour($to, $board)) {
-        return false;
-    }
-
+    // If it's a beetle, it can slide anywhere
     if ($isBeetle) {
         return true;
     }
 
-    if (!isNeighbour($from, $to)) {
-        return false;
-    }
-
-    $b = explode(',', $to);
-    $common = [];
-    foreach ($GLOBALS['OFFSETS'] as $pq) {
-        $p = $b[0] + $pq[0];
-        $q = $b[1] + $pq[1];
-        if (isNeighbour($from, $p . "," . $q) && isset($board[$p . "," . $q])) {
-            $common[] = $p . "," . $q;
-        }
-    }
-
+    // If it's a spider, it can slide if the target tile is adjacent
     if ($isSpider) {
-        return count($common) > 0;
+        return isNeighbour($from, $to);
     }
-    
-    return count($common) == 1;
+
+    // For other pieces, they can slide if the target tile is adjacent and empty
+    return isNeighbour($from, $to) && isEmpty($board, $to);
+}
+
+
+/**
+ * Get common neighbors between two tiles
+ *
+ * @param array $board A 2D grid representing the game board
+ * @param string $tileA A tile represented as a string with format "x,y"
+ * @param string $tileB Another tile represented as a string with format "x,y"
+ * @return array Common neighbors between the two tiles
+ */
+function getCommonNeighbors($board, $tileA, $tileB)
+{
+    $neighborsA = getNeighbors($board, $tileA);
+    $neighborsB = getNeighbors($board, $tileB);
+
+    // Get the common neighbors between tileA and tileB
+    return array_intersect($neighborsA, $neighborsB);
 }
 
 /**
@@ -152,37 +167,92 @@ function canSlide($board, $from, $to, $isBeetle = false, $isSpider = false)
  * @param array $board A 2D grid representing the game board
  * @param string $from A tile represented as a string with format "x,y"
  * @param string $to Another tile represented as a string with format "x,y"
- *
+ * @param bool $isSpider Optional: Whether the sliding piece is a spider
  * @return bool True if a slide path exists between the two tiles, false otherwise
  */
-function availableSlidePath($board, $from, $to)
+function availableSlidePath($board, $from, $to, $isSpider = false)
 {
-    $visited = [];
-    $queue = [$from];
-    
-    while (!empty($queue)) {
-        $current = array_shift($queue);
-        $visited[] = $current;
-
-        if ($current === $to) {
+    // Helper function to recursively explore the board
+    function explorePath($board, $current, $target, &$visited, &$paths, $isSpider)
+    {
+        // Base case: If the current tile is the target tile and spider condition met, return true
+        if ($current == $target && (!$isSpider || count($paths[$current][0]) == 4)) {
             return true;
         }
 
-        $currentArr = explode(',', $current);
-        foreach ($GLOBALS['OFFSETS'] as $pq) {
-            $p = $currentArr[0] + $pq[0];
-            $q = $currentArr[1] + $pq[1];
-            $neighbour = $p . "," . $q;
+        // Mark the current tile as visited
+        $visited[$current] = true;
 
-            if (isset($board[$neighbour]) || in_array($neighbour, $visited)) {
-                continue;
-            }
-            
-            if (canSlide($board, $current, $neighbour)) {
-                $queue[] = $neighbour;
+        // Explore each neighbor of the current tile
+        foreach (getNeighbors($current) as $neighbor) {
+            // Check if the neighbor is a valid move and has not been visited
+            if (isValidMove($board, $current, $neighbor) && !isset($visited[$neighbor])) {
+                // Record the path to the neighbor
+                $paths[$neighbor] = array_map(function ($path) use ($neighbor) {
+                    return [...$path, $neighbor];
+                }, $paths[$current] ?? [[$current]]);
+
+                // Recursively explore the neighbor
+                if (explorePath($board, $neighbor, $target, $visited, $paths, $isSpider)) {
+                    return true; // If a path is found, return true
+                }
             }
         }
+
+        return false; // If no path is found, return false
     }
 
-    return false;
+    // Initialize arrays to track visited tiles and paths
+    $visited = [];
+    $paths = [$from => [[$from]]];
+
+    // Start exploring from the initial tile
+    return explorePath($board, $from, $to, $visited, $paths, $isSpider);
+}
+
+/**
+ * Checks if a move from one tile to another is valid.
+ *
+ * @param array $board A 2D grid representing the game board
+ * @param string $from A tile represented as a string with format "x,y"
+ * @param string $to Another tile represented as a string with format "x,y"
+ * @return bool True if the move is valid, false otherwise
+ */
+function isValidMove($board, $from, $to)
+{
+    // Check if the target tile is empty and adjacent to the source tile
+    return !isset($board[$to]) && isAdjacent($from, $to);
+}
+
+/**
+ * Checks if two tiles are adjacent.
+ *
+ * @param string $tile1 A tile represented as a string with format "x,y"
+ * @param string $tile2 Another tile represented as a string with format "x,y"
+ * @return bool True if the tiles are adjacent, false otherwise
+ */
+function isAdjacent($tile1, $tile2)
+{
+    [$x1, $y1] = explode(',', $tile1);
+    [$x2, $y2] = explode(',', $tile2);
+    $dx = abs($x1 - $x2);
+    $dy = abs($y1 - $y2);
+    return ($dx + $dy == 1) || ($dx == 1 && $dy == 1);
+}
+
+/**
+ * Gets neighboring tiles of a given tile.
+ *
+ * @param string $tile A tile represented as a string with format "x,y"
+ * @return array An array of neighboring tiles
+ */
+function getNeighbours($tile)
+{
+    [$x, $y] = explode(',', $tile);
+    return [
+        ($x - 1) . ",$y",
+        ($x + 1) . ",$y",
+        "$x," . ($y - 1),
+        "$x," . ($y + 1)
+    ];
 }
