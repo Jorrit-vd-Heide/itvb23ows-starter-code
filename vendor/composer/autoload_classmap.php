@@ -885,7 +885,6 @@ return array(
     'PHPUnit\\Util\\PHP\\AbstractPhpProcess' => $vendorDir . '/phpunit/phpunit/src/Util/PHP/AbstractPhpProcess.php',
     'PHPUnit\\Util\\PHP\\DefaultPhpProcess' => $vendorDir . '/phpunit/phpunit/src/Util/PHP/DefaultPhpProcess.php',
     'PHPUnit\\Util\\PHP\\PhpProcessException' => $vendorDir . '/phpunit/phpunit/src/Util/Exception/PhpProcessException.php',
-    'PHPUnit\\Util\\PHP\\WindowsPhpProcess' => $vendorDir . '/phpunit/phpunit/src/Util/PHP/WindowsPhpProcess.php',
     'PHPUnit\\Util\\Reflection' => $vendorDir . '/phpunit/phpunit/src/Util/Reflection.php',
     'PHPUnit\\Util\\Test' => $vendorDir . '/phpunit/phpunit/src/Util/Test.php',
     'PHPUnit\\Util\\ThrowableToStringMapper' => $vendorDir . '/phpunit/phpunit/src/Util/ThrowableToStringMapper.php',
@@ -1178,6 +1177,9 @@ return array(
     'dropDownTest' => $baseDir . '/Tests/dropDownTest.php',
     'grassHopperTest' => $baseDir . '/Tests/grassHopperTest.php',
     'moveTest' => $baseDir . '/Tests/moveTest.php',
+    'passTest' => $baseDir . '/Tests/passTest.php',
     'playTileTest' => $baseDir . '/Tests/playTileTest.php',
     'queenBeeTest' => $baseDir . '/Tests/queenBeeTest.php',
+    'soldierAntTest' => $baseDir . '/Tests/soldierAntTest.php',
+    'spiderTest' => $baseDir . '/Tests/spiderTest.php',
 );
