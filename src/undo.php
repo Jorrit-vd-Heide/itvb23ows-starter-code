@@ -32,7 +32,7 @@ try {
     $controller->undo();
     
     // Save updated game state to session
-    $game->saveStateToSession();
+    $game->saveState();
 } catch (Exception $e) {
     // Handle exceptions
     handleErrorAndRedirect($e->getMessage());
